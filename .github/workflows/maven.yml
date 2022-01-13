@@ -31,15 +31,17 @@ jobs:
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
         cp src/run/resources/configuration.properties target/docker/.
-    - name: Build Docker container
+    - name: Build & Publish Docker container
+      uses: azure/docker-login@v1
+      with:
+        login-server: zlarifhoacr.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
       run: |
-        cd target/docker && docker build -t kafkatests:${{ github.sha }} .
-
-    # - uses: azure/docker-login@v1
-    #     with:
-    #       login-server: yourACRname.azurecr.io
-    #       username: ${{ secrets.ACR_USERNAME }}
-    #       password: ${{ secrets.ACR_PASSWORD }}
+        cd target/docker
+        docker build -t zlarifhoacr.azurecr.io/kafkatests:${{ github.sha }} .
+        docker push zlarifhoacr.azurecr.io/kafkatests:${{ github.sha }}
+}
 
       
       
