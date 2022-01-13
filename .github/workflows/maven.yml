@@ -33,7 +33,8 @@ jobs:
         login-server: zlarifhoacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-      run: |
+        
+    - run: |
         cd target/docker && docker build -t zlarifhoacr.azurecr.io/kafkatests:${{ github.sha }} .
 
     # - uses: azure/docker-login@v1
