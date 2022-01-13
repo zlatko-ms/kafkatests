@@ -24,6 +24,7 @@ jobs:
     - name: Prepare Docker build tree
       run: |
         mkdir target/docker
+        cp target/*.jar target/docker/.
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
         cp src/run/resources/configuration.properties target/docker/.
@@ -33,7 +34,7 @@ jobs:
         login-server: zlarifhoacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-        
+
     - run: |
         cd target/docker && docker build -t zlarifhoacr.azurecr.io/kafkatests:${{ github.sha }} .
 
