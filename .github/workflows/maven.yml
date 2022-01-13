@@ -19,10 +19,10 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
+
     - name: Build with Maven
       run: mvn -B clean package --file pom.xml
-    - name: Get branch name
-      uses: nelonoel/branch-name@v1
+
     - name: Prepare Docker build tree
       run: |
         mkdir target/docker
@@ -30,6 +30,7 @@ jobs:
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
         cp src/run/resources/configuration.properties target/docker/.
+
     - name: Build Docker container
       uses: azure/docker-login@v1
       with:
@@ -39,11 +40,7 @@ jobs:
 
     - run: |
         cd target/docker
-        docker build -t zlarifhoacr.azurecr.io/kafkatests:${BRANCH_NAME} .
-        docker push zlarifhoacr.azurecr.io/kafkatests:${BRANCH_NAME}
+        docker build -t zlarifhoacr.azurecr.io/kafkatests:1.0 .
+        docker push zlarifhoacr.azurecr.io/kafkatests:1.0
 
-    # - uses: azure/docker-login@v1
-    #     with:
-    #       login-server: yourACRname.azurecr.io
-    #       username: ${{ secrets.ACR_USERNAME }} ${BRANCH_NAME}
-    #       password: ${{ secrets.ACR_PASSWORD }} ${{ github.sha }} 
+    #${{ github.sha }} 
