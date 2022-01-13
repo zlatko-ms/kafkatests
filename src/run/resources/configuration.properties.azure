@@ -1,6 +1,5 @@
 
 ## kafka settings
-##kafka.bootstrap.servers=localhost:9092
 kafka.bootstrap.servers=zktests.servicebus.windows.net:9093
 kafka.client.id=azkafkatest
 kafka.security.protocol=SASL_SSL
@@ -18,10 +17,3 @@ consumer.topic.name=ztopic
 consumer.poll.duration.ms=1000
 consumer.wait.after.poll.ms=1000
 consumer.group.id=ztesting
-
-
-
-#kafka.bootstrap.servers=zktests.servicebus.windows.net:9093
-#kafka.security.protocol=SASL_SSL
-#kafka.sasl.mechanism=PLAIN
-#kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://zktests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MMH6CbuZwhlrC6H9IJHwHCx94z9jN9rt/u+1kgGsaME=";
