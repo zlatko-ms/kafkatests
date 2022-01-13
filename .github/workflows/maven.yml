@@ -31,7 +31,8 @@ jobs:
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
         cp src/run/resources/configuration.properties target/docker/.
-    - name: Build & Publish Docker container
+    
+    - name: Build and Publish Docker container
       # uses: azure/docker-login@v1
       # with:
       #   login-server: zlarifhoacr.azurecr.io
