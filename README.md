@@ -16,7 +16,7 @@ java -jar target/azsptest-0.0.1-SNAPSHOT.jar serviceName configuratioFile
 
 producer : produces messages per batch, with possibiluty to limit the number of messages.
 
-consuler : consumes the messages from a given topic
+consumer : consumes the messages from a given topic
 
 ### configuration 
 
