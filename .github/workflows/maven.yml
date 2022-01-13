@@ -24,5 +24,21 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B clean package --file pom.xml
+    - name: Prepare Docker build tree
+      run: |
+        mkdir target/docker
+        cp src/main/docker/Dockerfile target/docker/.
+        cp src/main/shell/startapp.sh target/docker/.
+        cp src/main/run/resources/configuration.properties target/docker/.
+    - name: Build Docker container
+      run: |
+        cd target/docker && docker build -t kafkatests:${{ github.sha }} .
+
+    # - uses: azure/docker-login@v1
+    #     with:
+    #       login-server: yourACRname.azurecr.io
+    #       username: ${{ secrets.ACR_USERNAME }}
+    #       password: ${{ secrets.ACR_PASSWORD }}
+
       
       
