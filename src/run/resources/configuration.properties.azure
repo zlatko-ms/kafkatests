@@ -5,7 +5,7 @@ kafka.bootstrap.servers=zktests.servicebus.windows.net:9093
 kafka.client.id=azkafkatest
 kafka.security.protocol=SASL_SSL
 kafka.sasl.mechanism=PLAIN
-kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://zktests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MMH6CbuZwhlrC6H9IJHwHCx94z9jN9rt/u+1kgGsaME=";
+kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://zktests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ABCDEFG=";
 
 ## producer settings
 producer.topic.name=ztopic
