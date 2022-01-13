@@ -27,6 +27,7 @@ jobs:
     - name: Prepare Docker build tree
       run: |
         mkdir target/docker
+        cp target/*.jar target/docker/.
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
         cp src/run/resources/configuration.properties target/docker/.
