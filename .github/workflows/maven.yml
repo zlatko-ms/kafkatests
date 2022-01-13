@@ -29,7 +29,7 @@ jobs:
         mkdir target/docker
         cp src/main/docker/Dockerfile target/docker/.
         cp src/main/shell/startapp.sh target/docker/.
-        cp src/main/run/resources/configuration.properties target/docker/.
+        cp src/run/resources/configuration.properties target/docker/.
     - name: Build Docker container
       run: |
         cd target/docker && docker build -t kafkatests:${{ github.sha }} .
