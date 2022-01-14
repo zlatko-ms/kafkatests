@@ -16,11 +16,11 @@ mvn clean package
 
 ### Build a docker container
 
-I'm definetly not a fan of the maven docker plugins, as they are cumbesome and end up with a huge lost of time.
+I'm definetly not a fan of the maven docker plugins, as they are cumbersome and usually end up with a huge lost of time.
 
-Hence I prefear to use docker comamnds directly in the CI/CD pipeline and avoid intermediary shells.
+Hence I prefear to use docker commands directly in the CI/CD pipeline and avoid any intermediary shells to maintain.
 
-Here is an extract of the commands used to build the container in the CI/CD pipeline : 
+Here is an extract of the commands used to build the container in the CI/CD pipeline, that should work on your local workstation : 
 
 ```console
 
@@ -62,9 +62,9 @@ An example of a configuration file for connecting to an Azure Event Hub can be f
 
 In order to avoid storing sensible infromation in the configuration file, the application will overload all the **kafka** prefixed properties with the values of environnement variables starting with KAFKA.
 
-For instance to overload the kafka.bootstrap.servers property, define the KAFKA_BOOTSTRAP_SERVERS environnement value. The Env variable will take precedence.
+For instance to overload the kafka.bootstrap.servers property, define the KAFKA_BOOTSTRAP_SERVERS environnement variable. The Env variable will take precedence over the property.
 
-This system allow to run the application from a container, and to propagate sensible properties via the environnement variables, which can be secured on your CI/CD.
+This system provides a conventient way to run the application in a container, by propagating sensible values via the environnement variables, which can be easly  secured on your CI/CD side.
 
 The **kafka** service properties can be fetched from the envrionnement, in order to run the app from Docker containers without propagating a conf file 
 
@@ -73,8 +73,12 @@ The **kafka** service properties can be fetched from the envrionnement, in order
 To run the app launch the following cmd line : 
 
 ```console
-java -jar target/azsptest-0.0.1-SNAPSHOT.jar serviceName configuratioFile
+java -jar target/azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
 ```
+
+Where : 
+- **serviceName** is one of the following : **consumer** or **producer**
+- **configurationFle** is a path to a valid configuration properties file
 
 ## Run from Docker
 
