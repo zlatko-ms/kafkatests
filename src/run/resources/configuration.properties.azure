@@ -1,6 +1,6 @@
 
 ## kafka settings
-kafka.bootstrap.servers=zktests.servicebus.windows.net:9093
+kafka.bootstrap.servers=myeventhub.servicebus.windows.net:9093
 kafka.client.id=azkafkatest
 kafka.security.protocol=SASL_SSL
 kafka.sasl.mechanism=PLAIN
