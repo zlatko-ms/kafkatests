@@ -16,9 +16,11 @@ mvn clean package
 
 ### Build a docker container
 
-I'm definetly not a fan of the maven docker plugins, that become really cumbersome at some point of time.
+I'm definetly not a fan of the maven docker plugins, as they are cumbesome and end up with a huge lost of time.
 
-So to build a docker container you can execute the following once you are logged on your docker repo : 
+Hence I prefear to use docker comamnds directly in the CI/CD pipeline and avoid intermediary shells.
+
+Here is an extract of the commands used to build the container in the CI/CD pipeline : 
 
 ```console
 
