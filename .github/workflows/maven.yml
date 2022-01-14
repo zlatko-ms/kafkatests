@@ -39,9 +39,9 @@ jobs:
         password: ${{ secrets.ACR_PASSWORD }}
 
     - run: |
+        export RELEASE_TAG=`cat RELEASE`
         cd target/docker
-        export RELEASE_TAG=`cat ../../RELEASE`
-        docker build -t zlarifhoacr.azurecr.io/kafkatests:$RELEASE_TAG
-        docker push zlarifhoacr.azurecr.io/kafkatests:$RELEASE_TAG
+        docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
+        docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
 
     #${{ github.sha }} 
