@@ -26,11 +26,8 @@ jobs:
 
     - name: Prepare Docker build tree
       run: |
-        mkdir target/docker
-        cp target/*.jar target/docker/.
-        cp src/main/docker/Dockerfile target/docker/.
-        cp src/main/shell/startapp.sh target/docker/.
-        cp src/run/resources/configuration.properties target/docker/.
+        cp src/main/docker/* target/.
+        cp src/run/conf/configuration.properties target/.
 
     - name: Build Docker container
       uses: azure/docker-login@v1
@@ -41,7 +38,7 @@ jobs:
 
     - run: |
         export RELEASE_TAG=`cat RELEASE`
-        cd target/docker
+        cd target
         docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG" .
         docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
 

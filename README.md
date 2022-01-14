@@ -23,14 +23,10 @@ Hence I prefear to use docker commands directly in the CI/CD pipeline and avoid 
 Here is an extract of the commands used to build the container in the CI/CD pipeline, that should work on your local workstation : 
 
 ```console
-
-mkdir target/docker
-cp target/*.jar target/docker/.
-cp src/main/docker/Dockerfile target/docker/.
-cp src/main/shell/startapp.sh target/docker/.
-cp src/run/resources/configuration.properties target/docker/.
+cp src/main/docker/* target/.
+cp configuration.properties target/.
 export RELEASE_TAG=`cat RELEASE`
-cd target/docker
+cd target
 docker build -t your.docker.registry.io/kafkatests:"$RELEASE_TAG" .
 docker push your.docker.registry.io/kafkatests:"$RELEASE_TAG"
 ```
@@ -54,9 +50,9 @@ The **consumer** perfix is used to configure all the consumer properties, mainly
 
 The **producer** prefix is used to configure all the producer properties, mainly related to the number of messages to send (-1 for infinite loop) and to the batch size.
 
-An example of the configuration file for connecting to a local kafka cluyster can be found in [src/run/resources/configuration.properties](src/run/resources/configuration.properties) .
+An example of the configuration file for connecting to a local kafka cluyster can be found in [src/run/conf/configuration.properties](src/run/conf/configuration.properties) .
 
-An example of a configuration file for connecting to an Azure Event Hub can be found in [src/run/resources/configuration.properties.azure](src/run/resources/configuration.properties.azure) . Update the bootstrap and jaas config values to fit your environnement.
+An example of a configuration file for connecting to an Azure Event Hub can be found in [src/run/conf/configuration.properties.azure](src/run/conf/configuration.properties.azure) . Update the bootstrap and jaas config values to fit your environnement.
 
 ## Override via Environnement variables
 
