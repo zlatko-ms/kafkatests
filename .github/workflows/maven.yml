@@ -2,7 +2,7 @@ name: Build & Publish container
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, DOCKHUB ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
