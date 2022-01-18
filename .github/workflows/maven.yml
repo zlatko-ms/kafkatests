@@ -29,6 +29,15 @@ jobs:
         cp src/main/docker/* target/.
         cp src/run/conf/configuration.properties target/.
 
+    - name: Read release tag info
+      id: read_release_tag_file
+      uses: andstor/file-reader-action@v1
+      with:
+          path: "RELEASE"
+
+    - name: Display release tag
+        run: echo "${ steps.read_release_tag_file.outputs.contents }"
+
     # - name: Log in to Docker Hub
     #   uses: docker/login-action@v1
     #   with:
@@ -49,7 +58,7 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            zlarifhoacr.azurecr.io/kafkatests:DOCKHUB
+            zlarifhoacr.azurecr.io/kafkatests:${ steps.read_release_tag_file.outputs.contents }
 # ${{ secrets.DOCKER_USERNAME }}/kafkatests:DOCKHUB
             
 
