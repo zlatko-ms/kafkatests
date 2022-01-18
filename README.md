@@ -14,22 +14,9 @@ This is a java project using maven, so in order to build the application please 
 mvn clean package
 ```
 
-### Build a docker container
+### Docker Container
 
-I'm definetly not a fan of the maven docker plugins, as they are cumbersome and usually end up with a huge lost of time.
-
-Hence I prefear to use docker commands directly in the CI/CD pipeline and avoid any intermediary shells to maintain.
-
-Here is an extract of the commands used to build the container in the CI/CD pipeline, that should work on your local workstation : 
-
-```console
-cp src/main/docker/* target/.
-cp configuration.properties target/.
-export RELEASE_TAG=`cat RELEASE`
-cd target
-docker build -t your.docker.registry.io/kafkatests:"$RELEASE_TAG" .
-docker push your.docker.registry.io/kafkatests:"$RELEASE_TAG"
-```
+The container is build upon changed and deployed to the the [Docker Hub](https://hub.docker.com/repository/docker/zlatkoa/kafkatests)
 
 ## Run 
 
