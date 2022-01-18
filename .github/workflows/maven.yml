@@ -48,7 +48,7 @@ jobs:
     - name: Login to Azure Container Registry
       uses: docker/login-action@v1 
       with:
-        registry: zlarifhoacr.azurecr.io
+        registry: $${ secrets.ACR_NAME }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
@@ -59,8 +59,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
-            zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+            $${ secrets.ACR_NAME }}/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
 
 
 # ${{ secrets.DOCKER_USERNAME }}/kafkatests:DOCKHUB
