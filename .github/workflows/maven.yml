@@ -36,7 +36,7 @@ jobs:
           path: "RELEASE"
 
     - name: Display release tag
-        run: echo "${ steps.read_release_tag_file.outputs.contents }"
+      run: echo "${ steps.read_release_tag_file.outputs.contents }"
 
     # - name: Log in to Docker Hub
     #   uses: docker/login-action@v1
