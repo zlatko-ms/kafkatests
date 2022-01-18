@@ -2,7 +2,7 @@ name: Build & Publish container
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, DOCKHUB ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -29,17 +29,40 @@ jobs:
         cp src/main/docker/* target/.
         cp src/run/conf/configuration.properties target/.
 
-    - name: Build Docker container
-      uses: azure/docker-login@v1
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
-        login-server: zlarifhoacr.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - run: |
-        export RELEASE_TAG=`cat RELEASE`
-        cd target
-        docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG" .
-        docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
+    - name: Login to Azure Container Registry
+      uses: docker/login-action@v1 
+      with:
+          registry: zlarifhoacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Container build and push
+      uses: docker/build-push-action@v2
+      with:
+          context: target
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/kafkatests:DOCKHUB
+            zlarifhoacr.azurecr.io/kafkatests:DOCKHUB
+
+    # - name: Build Docker container
+    #   uses: azure/docker-login@v1
+    #   with:
+    #     login-server: zlarifhoacr.azurecr.io
+    #     username: ${{ secrets.ACR_USERNAME }}
+    #     password: ${{ secrets.ACR_PASSWORD }}
+
+    # - run: |
+    #     export RELEASE_TAG=`cat RELEASE`
+    #     cd target
+    #     docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG" .
+    #     docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
 
     #${{ github.sha }} 
