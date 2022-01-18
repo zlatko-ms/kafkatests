@@ -29,17 +29,35 @@ jobs:
         cp src/main/docker/* target/.
         cp src/run/conf/configuration.properties target/.
 
-    - name: Build Docker container
-      uses: azure/docker-login@v1
+    - name: Read release tag info
+      id: read_release_tag_file
+      uses: andstor/file-reader-action@v1
       with:
-        login-server: zlarifhoacr.azurecr.io
+        path: "RELEASE"
+
+    - name: Display release tag
+      run: echo ${{ steps.read_release_tag_file.outputs.contents }}
+ 
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Login to Azure Container Registry
+      uses: docker/login-action@v1 
+      with:
+        registry: zlarifhoacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
-    - run: |
-        export RELEASE_TAG=`cat RELEASE`
-        cd target
-        docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG" .
-        docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
-
-    #${{ github.sha }} 
+    - name: Container build and push
+      uses: docker/build-push-action@v2
+      with:
+          context: target
+          platforms: linux/amd64
+          push: true
+          tags: |
+            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+            zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
