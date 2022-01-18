@@ -48,7 +48,7 @@ jobs:
     - name: Login to Azure Container Registry
       uses: docker/login-action@v1 
       with:
-        registry: $${ secrets.ACR_NAME }}
+        registry: zlarifhoacr.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
@@ -59,24 +59,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
-            $${ secrets.ACR_NAME }}/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
-
-
-# ${{ secrets.DOCKER_USERNAME }}/kafkatests:DOCKHUB
-            
-
-    # - name: Build Docker container
-    #   uses: azure/docker-login@v1
-    #   with:
-    #     login-server: zlarifhoacr.azurecr.io
-    #     username: ${{ secrets.ACR_USERNAME }}
-    #     password: ${{ secrets.ACR_PASSWORD }}
-
-    # - run: |
-    #     export RELEASE_TAG=`cat RELEASE`
-    #     cd target
-    #     docker build -t zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG" .
-    #     docker push zlarifhoacr.azurecr.io/kafkatests:"$RELEASE_TAG"
-
-    #${{ github.sha }} 
+            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+            zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
