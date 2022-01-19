@@ -1,10 +1,10 @@
-
 ## kafka settings
-kafka.bootstrap.servers=myeventhub.servicebus.windows.net:9093
-kafka.client.id=azkafkatest
+kafka.bootstrap.servers=kafkatests.servicebus.windows.net:9093
+kafka.client.id=azkafkatest42
 kafka.security.protocol=SASL_SSL
 kafka.sasl.mechanism=PLAIN
-kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://zktests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ABCDEFG=";
+kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://kafkatests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXX";
+
 
 ## producer settings
 producer.topic.name=ztopic
@@ -17,3 +17,6 @@ consumer.topic.name=ztopic
 consumer.poll.duration.ms=1000
 consumer.wait.after.poll.ms=1000
 consumer.group.id=ztesting
+
+## metadata fetchin settings
+metadata.describe.cluster=true
