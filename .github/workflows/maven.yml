@@ -33,7 +33,7 @@ jobs:
     - name: Read release tag info
       id: read_release_tag_file
       run: |
-        cat 'RELEASE'
+        cat ./RELEASE
   
     - name: Display release tag
       run: echo ${{ steps.read_release_tag_file.outputs.contents }}
@@ -51,15 +51,15 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
-#     - name: Container build and push
-#       uses: docker/build-push-action@v2
-#       with:
-#           context: target
-#           platforms: linux/amd64
-#           push: true
-#           tags: |
-# #            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
-#             zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+    - name: Container build and push
+      uses: docker/build-push-action@v2
+      with:
+          context: target
+          platforms: linux/amd64
+          push: true
+          tags: |
+            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+            zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
 
     - name: Build distribution tarball
       run : |
@@ -70,6 +70,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: kafkatests.dist.zip
-        path: target/kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.zip
+        path: target/kafkatests.zip
 
       
