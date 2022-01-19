@@ -27,6 +27,7 @@ jobs:
     - name: Prepare Docker build tree
       run: |
         cp src/main/docker/* target/.
+        cp src/run/conf/configuration.properties.azure target/.
         cp src/run/conf/configuration.properties target/.
 
     - name: Read release tag info
@@ -64,4 +65,11 @@ jobs:
       run : |
         cd target
         zip kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.zip *.jar *.properties *.azure
+
+    - name: Publish distribution tarball
+      uses: actions/upload-artifact@v2
+      with:
+        name: kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.dist
+        path: target/kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.zip
+
       
