@@ -11,8 +11,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-      env:
-        RELEASE_TAG: 1.0.1
+    env:
+      RELEASE_TAG: 1.0.1
 
     steps:
     
