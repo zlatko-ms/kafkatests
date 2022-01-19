@@ -38,18 +38,18 @@ jobs:
     - name: Display release tag
       run: echo ${{ steps.read_release_tag_file.outputs.contents }}
  
-    # - name: Log in to Docker Hub
-    #   uses: docker/login-action@v1
-    #   with:
-    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-#     - name: Login to Azure Container Registry
-#       uses: docker/login-action@v1 
-#       with:
-#         registry: zlarifhoacr.azurecr.io
-#         username: ${{ secrets.ACR_USERNAME }}
-#         password: ${{ secrets.ACR_PASSWORD }}
+    - name: Login to Azure Container Registry
+      uses: docker/login-action@v1 
+      with:
+        registry: zlarifhoacr.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
 #     - name: Container build and push
 #       uses: docker/build-push-action@v2
@@ -64,12 +64,12 @@ jobs:
     - name: Build distribution tarball
       run : |
         cd target
-        zip kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.zip *.jar *.properties *.azure
+        zip kafkatests.zip *.jar *.properties *.azure
 
     - name: Publish distribution tarball
       uses: actions/upload-artifact@v2
       with:
-        name: kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.dist
+        name: kafkatests.dist.zip
         path: target/kafkatests.${{ steps.read_release_tag_file.outputs.contents }}.zip
 
       
