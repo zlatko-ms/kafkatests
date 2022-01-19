@@ -1,6 +1,7 @@
 package org.zlatko.testing.spring.azsptest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +11,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.admin.TopicListing;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -26,6 +30,9 @@ import org.zlatko.testing.spring.azsptest.Configuration.ServiceConfiguration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
 import lombok.Getter;
@@ -37,9 +44,9 @@ public class Kafka {
 
 	/** defines the types of test workloads */
 	public enum TestWorkloadType {
-		PRODUCER, CONSUMER
+		PRODUCER, CONSUMER, METADATA
 	}
-	
+
 	/** defines the kafka test service interface */
 	public interface KafkaTestService {
 
@@ -58,26 +65,29 @@ public class Kafka {
 		// returns the specific service workload properties
 		public Properties getServiceProperties();
 	}
-	
+
 	/** simple kafka message abstraction */
 	public interface KafkaTestMessage {
 		String getKey();
+
 		Object getValue();
+
 		String getValueAsJson();
 	}
-	
+
 	/** builds the kafka service to test */
-	public static final KafkaTestService buildTestService(TestWorkloadType type,ServiceConfiguration appConf) {
+	public static final KafkaTestService buildTestService(TestWorkloadType type, ServiceConfiguration appConf) {
 		switch (type) {
 		case PRODUCER:
 			return new SimpleKafkaProducer(appConf);
 		case CONSUMER:
 			return new SimpleKafkaConsumer(appConf);
+		case METADATA:
+			return new AdminKafkaService(appConf);
 		}
-		throw new IllegalArgumentException(type.name()+" is not supported yet");
+		throw new IllegalArgumentException(type.name() + " is not supported yet");
 	}
-	
-	
+
 	public static String getValidServiceTypesAsString(String separator) {
 		List<String> validServices = Lists.newArrayList();
 		for (TestWorkloadType type : TestWorkloadType.values()) {
@@ -85,15 +95,15 @@ public class Kafka {
 		}
 		return String.join(separator, validServices);
 	}
-	
+
 	public static String getValidServiceTypesAsString() {
 		return getValidServiceTypesAsString(",");
 	}
-	
-	/**Implementation of a simple kafka , string transported, key/value message  */
+
+	/** Implementation of a simple kafka , string transported, key/value message */
 	@Getter
 	public static class SimpleKafkaMessage implements KafkaTestMessage {
-		
+
 		static ObjectWriter jsonObjectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
 		private String key = UUID.randomUUID().toString();
@@ -102,10 +112,10 @@ public class Kafka {
 		public SimpleKafkaMessage(Object value) {
 			this.value = value;
 		}
-		
-		public SimpleKafkaMessage(String key,Object value) {
-			this.key=key;
-			this.value=value;
+
+		public SimpleKafkaMessage(String key, Object value) {
+			this.key = key;
+			this.value = value;
 		}
 
 		@SneakyThrows
@@ -114,8 +124,11 @@ public class Kafka {
 			return jsonObjectWriter.writeValueAsString(value);
 		}
 	}
-	
-	/** base kafka test service class, provides common configuration processing facilities */ 
+
+	/**
+	 * base kafka test service class, provides common configuration processing
+	 * facilities
+	 */
 	abstract static class BaseKafkaService implements KafkaTestService {
 
 		private final static String KAFKA_SHARED_SERVICE = "kafka";
@@ -156,7 +169,6 @@ public class Kafka {
 			return serviceProperties;
 		}
 	}
-	
 
 	/** simple kafka consumer test service */
 	final static class SimpleKafkaConsumer extends BaseKafkaService implements KafkaTestService {
@@ -179,9 +191,12 @@ public class Kafka {
 			super(TestWorkloadType.CONSUMER, configuration);
 
 			topicName = getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_NAME, "");
-			pollIntervalMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_POLL_DURATION_MS, "1000"));
-			waitAfterPollMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_POLL_MS, "1000"));
-			consumerGroup = getServiceProperties().getProperty(ConfigurationProperties.CONF_CONSUMER_GROUP_ID, "azTestConsumerGroup");
+			pollIntervalMs = Long.parseLong(
+					getServiceProperties().getProperty(ConfigurationProperties.CONF_POLL_DURATION_MS, "1000"));
+			waitAfterPollMs = Long.parseLong(
+					getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_POLL_MS, "1000"));
+			consumerGroup = getServiceProperties().getProperty(ConfigurationProperties.CONF_CONSUMER_GROUP_ID,
+					"azTestConsumerGroup");
 
 			addSpecificKafkaProp(ConsumerConfig.GROUP_ID_CONFIG, consumerGroup);
 			addSpecificKafkaProp(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -204,7 +219,8 @@ public class Kafka {
 					final ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(pollIntervalMs);
 					long polledRecords = consumerRecords.count();
 					overallCount += polledRecords;
-					log.info(String.format(LogMessageConstants.MESSAGE_CONSUMED_LOG_DATA, pollIntervalMs, polledRecords, overallCount));
+					log.info(String.format(LogMessageConstants.MESSAGE_CONSUMED_LOG_DATA, pollIntervalMs, polledRecords,
+							overallCount));
 					kafkaConsumer.commitAsync();
 					consumerRecords.forEach((record) -> {
 						log.fine("got message key=" + record.key() + " value=" + record.value());
@@ -218,10 +234,10 @@ public class Kafka {
 		}
 
 	}
-	
+
 	/** simple kafka producer test service */
 	final static class SimpleKafkaProducer extends BaseKafkaService implements KafkaTestService {
-		
+
 		private final class ConfigurationProperties {
 			static final String CONF_BATCH_SIZE = "messages.per.batch";
 			static final String CONF_WAIT_AFTER_BATCH = "wait.after.batch.ms";
@@ -240,24 +256,24 @@ public class Kafka {
 		private long messageLimit;
 
 		public SimpleKafkaProducer(ServiceConfiguration configuration) {
-			
-			super(TestWorkloadType.PRODUCER,configuration);
-			
-			messagesPerBatch = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_BATCH_SIZE,"1"));
-			waitAfterBatchMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_BATCH,"5000"));;
-			topicName = getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_NAME,"");
-			topicCreate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_CREATE,"true"));
-			messageLimit = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_MAX_MESSAGES,"-1"));
-			
+
+			super(TestWorkloadType.PRODUCER, configuration);
+
+			messagesPerBatch = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_BATCH_SIZE, "1"));
+			waitAfterBatchMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_BATCH, "5000"));
+			topicName = getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_NAME, "");
+			topicCreate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_CREATE, "true"));
+			messageLimit = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_MAX_MESSAGES, "-1"));
+
 			adminClient = AdminClient.create(getKafkaProperties());
 			addSpecificKafkaProp(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 			addSpecificKafkaProp(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 			producer = new KafkaProducer<String, String>(getKafkaProperties());
 		}
-		
+
 		@SneakyThrows
 		private void createTopic() {
-			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CREATING,topicName));
+			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CREATING, topicName));
 			List<NewTopic> topicList = new ArrayList<NewTopic>();
 			Map<String, String> configs = new HashMap<String, String>();
 			int partitions = 1;
@@ -265,16 +281,16 @@ public class Kafka {
 			NewTopic newTopic = new NewTopic(topicName, partitions, replication).configs(configs);
 			topicList.add(newTopic);
 			adminClient.createTopics(topicList);
-			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CREATED,topicName));
+			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CREATED, topicName));
 		}
 
 		@SneakyThrows
 		private void ensureTopicExists() {
-			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CHECKING,topicName));
+			log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_CHECKING, topicName));
 			ListTopicsResult listTopics = adminClient.listTopics();
 			Set<String> names = listTopics.names().get();
-			if ( names.contains(topicName) ) {
-				log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_EXISTS,topicName));
+			if (names.contains(topicName)) {
+				log.info(String.format(LogMessageConstants.MESSAGE_TOPIC_EXISTS, topicName));
 			} else {
 				createTopic();
 			}
@@ -293,20 +309,20 @@ public class Kafka {
 
 		@SneakyThrows
 		private void sendBatchToTopic(String topicName, List<KafkaTestMessage> messages) {
-			
-			long resultingOffset=0;
+
+			long resultingOffset = 0;
 			try {
 				for (KafkaTestMessage msg : messages) {
-					final RecordMetadata rm = producer
-							.send(new ProducerRecord<String, String>(topicName, msg.getKey().toString(), msg.getValueAsJson()))
-							.get();
+					final RecordMetadata rm = producer.send(new ProducerRecord<String, String>(topicName,
+							msg.getKey().toString(), msg.getValueAsJson())).get();
 					resultingOffset = rm.offset();
-				}			
+				}
 			} finally {
 				producer.flush();
-				messageCounter+=messages.size();
+				messageCounter += messages.size();
 			}
-			log.info(String.format(LogMessageConstants.MESSAGE_PRODUCED_LOG_DATA,messagesPerBatch,resultingOffset,messageCounter ));
+			log.info(String.format(LogMessageConstants.MESSAGE_PRODUCED_LOG_DATA, messagesPerBatch, resultingOffset,
+					messageCounter));
 
 		}
 
@@ -314,23 +330,126 @@ public class Kafka {
 		@Override
 		@SneakyThrows
 		public void run() {
-			log.info(String.format(LogMessageConstants.MESSAGE_STARTING_SERVICE,getName(),topicName));
+			log.info(String.format(LogMessageConstants.MESSAGE_STARTING_SERVICE, getName(), topicName));
 			if (topicCreate)
 				ensureTopicExists();
-			while (true) {			
+			while (true) {
 				List<KafkaTestMessage> messages = buildBatch();
 				sendBatchToTopic(topicName, messages);
-				if ( (messageLimit > 0 ) && (messageCounter >= messageLimit)){
+				if ((messageLimit > 0) && (messageCounter >= messageLimit)) {
 					log.info(String.format(LogMessageConstants.MESSAGE_LIMIT_REACHED, messageLimit));
 					return;
 				}
-				log.info(String.format(LogMessageConstants.MESSAGES_WAIT,waitAfterBatchMs));
+				log.info(String.format(LogMessageConstants.MESSAGES_WAIT, waitAfterBatchMs));
 				Thread.currentThread().sleep(waitAfterBatchMs);
 			}
 		}
 
 	}
-	
+
+	final static class AdminKafkaService extends BaseKafkaService implements KafkaTestService {
+
+		private final class ConfigurationProperties {
+			static final String CONF_DESCRIBE_CLUSTER = "describe.cluster";
+			static final String CONF_DESCRIBE_TOPICS = "describe.topics";
+			static final String CONF_DESCRIBE_INTERNAL_TOPICS = "describe.internal.topics";
+			static final String CONF_TOPICS_TO_DESCRIBE = "describe.topics.list";
+		}
+
+		private AdminClient adminClient;
+		private boolean describeTopicsPrivate = true;
+		private boolean describeClusterNodes = false;
+		private boolean describeTopics = true;
+		private List<String> describeTopicList = Lists.newArrayList();
+
+		// parse list of topics to describe
+		private List<String> getTopicsToDescribe() {
+			List<String> ret = Lists.newArrayList();
+			String listOfTopicsFromConf = getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPICS_TO_DESCRIBE, "");
+			if (!Strings.isNullOrEmpty(listOfTopicsFromConf)) {
+				Iterable<String> names = Splitter.on(",").split(listOfTopicsFromConf);
+				Iterators.addAll(ret,names.iterator());
+			}
+			return ret;
+		}
+		
+		public AdminKafkaService(ServiceConfiguration appConfig) {
+			super(TestWorkloadType.METADATA,appConfig);
+			describeClusterNodes = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_CLUSTER, "false"));
+			describeTopics = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_TOPICS, "true"));
+			describeTopicsPrivate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_INTERNAL_TOPICS, "false"));
+			describeTopicList.addAll(getTopicsToDescribe());
+			adminClient = AdminClient.create(getKafkaProperties());
+		}
+
+		private void describeClusterNodes() {
+			try {
+			if (describeClusterNodes) {
+				log.info(LogMessageConstants.MESSAGE_METADATA_FETCHING_NODES);
+				DescribeClusterResult clusterDesc = adminClient.describeCluster();
+				clusterDesc.nodes().get().forEach(node -> {
+					log.info(String.format("[*] node : host=%s id=%s rack=%s, port=%s", 
+							node.host(), 
+							node.idString(),
+							(node.hasRack() ? node.rack() : "none"),
+							node.port()));
+				});
+			}
+			} catch(Throwable e) {
+				log.severe(("unable to fetch cluster node metadata, cause="+e.getMessage()));;
+			}
+		}
+
+		@SneakyThrows
+		private List<String> fetchAllTopicNames() {
+			List<String> res = Lists.newArrayList();
+			log.info("Listing available topics");
+			Collection<TopicListing> topics = adminClient.listTopics().listings().get();
+			topics.forEach( topic -> {
+				if ((describeTopicsPrivate && topic.isInternal()) || (!topic.isInternal()))
+					res.add(topic.name());
+			});
+			log.info(String.format("Listed %d topics from the cluster",res.size()));
+			return res;
+		}
+
+		private void describeTopics() {
+			try {
+				if (describeTopics) {
+					if (describeTopicList.isEmpty()) {
+						describeTopicList.addAll(fetchAllTopicNames());
+					}
+					log.info(String.format("Fetching %d topic list metadata", describeTopicList.size()));
+					Map<String, TopicDescription> topics = adminClient.describeTopics(describeTopicList).all().get();
+					log.info(String.format("Fetched %d topic list metadata", topics.size()));
+
+					topics.values().forEach(topic -> {
+
+						StringBuilder sb = new StringBuilder("[*] topic name=" + topic.name());
+						sb.append(" partitions=" + topic.partitions().size());
+						sb.append(" internal=" + topic.isInternal());
+						sb.append(" id=" + topic.topicId().toString());
+						topic.partitions().forEach(partition -> {
+							sb.append(" partition_leader="+ partition.leader().host());
+							sb.append(" replicas="+partition.replicas().size());
+						});
+						log.info(sb.toString());
+					});
+
+				}
+			} catch (Throwable e) {
+				log.info(String.format("Error while fetching topic description " + e.getMessage()));
+			}
+		}
+
+		@Override
+		public void run() {
+			describeClusterNodes();
+			describeTopics();
+		}
+
+	}
+
 	/** centralizes all log messages for the kafka services */
 	static class LogMessageConstants {
 
@@ -350,8 +469,13 @@ public class Kafka {
 
 		public static final String MESSAGE_PRODUCED_LOG_DATA = MESSAGES_SEND + ";" + MESSAGES_SEND_COUNTERS;
 		public static final String MESSAGE_CONSUMED_LOG_DATA = MESSAGES_READ + ";" + MESSAGES_READ_COUNTERS;
-		
-		public static final String MESSAGE_LIMIT_REACHED ="all messages have been sent, limit of %d reached";
+
+		public static final String MESSAGE_LIMIT_REACHED = "all messages have been sent, limit of %d reached";
+		public static final String MESSAGE_METADATA_SEPARATOR = "------------------------------------------";
+		public static final String MESSAGE_METADATA_FETCHING_NODES = "fetching cluster nodes";
+		public static final String MESSAGE_METADATA_FETCHED_NODES = "discovered nodes :";
+		public static final String MESSAGE_METADATA_FETCHING_TOPICS = "fetching topics";
+		public static final String MESSAGE_METADATA_FETCHED_TOPICS = "fetched topics :";
 	}
 
 }

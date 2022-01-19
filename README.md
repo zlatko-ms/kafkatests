@@ -24,7 +24,7 @@ The container is build upon changed and deployed to the the [Docker Hub](https:/
 
 The application takes two parameters : 
 
-- the test service to execute [producer|consumer]
+- the test service to execute [producer|consumer|metadata]
 - the path to the configuration file 
 
 ### Configuration 
@@ -36,6 +36,8 @@ The **kafka** prefix is used to configure all the kafka related properties, such
 The **consumer** perfix is used to configure all the consumer properties, mainly related to the topic(s) to read ...
 
 The **producer** prefix is used to configure all the producer properties, mainly related to the number of messages to send (-1 for infinite loop) and to the batch size.
+
+The **metadata** prefix is used to configure the metadata fetcher. Default settings apply, but you can disable some steps by uncommeting the settings in the sample conf file.
 
 An example of the configuration file for connecting to a local kafka cluyster can be found in [src/run/conf/configuration.properties](src/run/conf/configuration.properties) .
 
@@ -60,7 +62,7 @@ java -jar target/azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
 ```
 
 Where : 
-- **serviceName** is one of the following : **consumer** or **producer**
+- **serviceName** is one of the following : **consumer** , **producer** or **metadata**
 - **configurationFle** is a path to a valid configuration properties file
 
 ## Run from Docker
