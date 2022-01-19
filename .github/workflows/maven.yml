@@ -43,22 +43,22 @@ jobs:
     #     username: ${{ secrets.DOCKERHUB_USERNAME }}
     #     password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    - name: Login to Azure Container Registry
-      uses: docker/login-action@v1 
-      with:
-        registry: zlarifhoacr.azurecr.io
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+#     - name: Login to Azure Container Registry
+#       uses: docker/login-action@v1 
+#       with:
+#         registry: zlarifhoacr.azurecr.io
+#         username: ${{ secrets.ACR_USERNAME }}
+#         password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Container build and push
-      uses: docker/build-push-action@v2
-      with:
-          context: target
-          platforms: linux/amd64
-          push: true
-          tags: |
-#            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
-            zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+#     - name: Container build and push
+#       uses: docker/build-push-action@v2
+#       with:
+#           context: target
+#           platforms: linux/amd64
+#           push: true
+#           tags: |
+# #            zlatkoa/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
+#             zlarifhoacr.azurecr.io/kafkatests:${{ steps.read_release_tag_file.outputs.contents }}
 
     - name: Build distribution tarball
       run : |
