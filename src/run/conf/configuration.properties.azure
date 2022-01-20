@@ -5,18 +5,22 @@ kafka.security.protocol=SASL_SSL
 kafka.sasl.mechanism=PLAIN
 kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://kafkatests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXX";
 
-
 ## producer settings
-producer.topic.name=ztopic
+producer.topic.name=ztopic73
+producer.topic.create=true
+producer.topic.create.partitions=3
+producer.topic.create.replication=2
 producer.messages.per.batch=100
-producer.messages.max=500
+producer.messages.max=5000
 producer.wait.after.batch.ms=1000
+producer.topic.partitioner=even_odd
 
 ## consumer settings
-consumer.topic.name=ztopic
+consumer.topic.name=ztopic73
 consumer.poll.duration.ms=1000
 consumer.wait.after.poll.ms=1000
 consumer.group.id=ztesting
+consumer.message.unit.print=true
 
 ## metadata fetchin settings
 metadata.describe.cluster=true
