@@ -84,12 +84,14 @@ This system provides a conventient way to run the application in a container, by
 To run the app launch the following cmd line : 
 
 ```console
-java -jar target/azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
+java -jar azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
 ```
 
 Where : 
 - **serviceName** is one of the following : **consumer** , **producer** or **metadata**
 - **configurationFle** is a path to a valid configuration properties file
+
+The jar file will be created under the target dir once you perform the build process.
 
 ## Run from Docker
 
