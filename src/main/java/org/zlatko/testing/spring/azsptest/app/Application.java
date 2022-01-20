@@ -1,6 +1,7 @@
 package org.zlatko.testing.spring.azsptest.app;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.boot.CommandLineRunner;
@@ -9,9 +10,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.zlatko.testing.spring.azsptest.kafka.Kafka;
+import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestService;
 import org.zlatko.testing.spring.azsptest.util.Configuration;
 import org.zlatko.testing.spring.azsptest.util.Configuration.CommandLineParameters;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
+
+import com.google.common.collect.Lists;
 
 import lombok.extern.java.Log;
 
@@ -50,12 +54,18 @@ public class Application {
 
 	// return the application configuration
 	private ServiceConfiguration getConfigurationParameter(CommandLineParameters params) {
+		List<String> envVarPrefixes = Lists.newArrayList();
+		Kafka.TestWorkloadType[] services = Kafka.TestWorkloadType.values();
+		for (Kafka.TestWorkloadType t : services ) {
+			envVarPrefixes.add(t.name().toUpperCase());
+		}
+		
 		Optional<String> confFile = params.getParam(PARAM_CONF);
 		ServiceConfiguration appConf = null;
 		if (!confFile.isEmpty()) {
 			File propFile = new File(confFile.get());
 			if (propFile.exists()) {
-				appConf = Configuration.buildConfiguration();
+				appConf = Configuration.buildConfiguration(envVarPrefixes);
 				appConf.loadFrom(confFile.get());
 			}
 		}

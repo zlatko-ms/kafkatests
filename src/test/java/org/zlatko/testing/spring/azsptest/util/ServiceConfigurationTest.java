@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Properties;
 
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-import org.zlatko.testing.spring.azsptest.util.Configuration;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 class ServiceConfigurationTest {
@@ -15,7 +15,7 @@ class ServiceConfigurationTest {
 	@Test
 	void testGetServiceConfiguration() {
 		
-		ServiceConfiguration appConf = Configuration.buildConfiguration();
+		ServiceConfiguration appConf = Configuration.buildConfiguration(Lists.newArrayList());
 		Properties ptest = new Properties();
 		ptest.put("service1.runner.id", "id1");
 		ptest.put("service1.runner.threads", "42");

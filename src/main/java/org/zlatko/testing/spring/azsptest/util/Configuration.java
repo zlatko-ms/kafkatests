@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -46,9 +47,8 @@ public class Configuration {
 	}
 
 	/** builds a service configuration implementation */
-	public static final ServiceConfiguration buildConfiguration() {
-		return new ServiceConfigurationImpl();
-
+	public static final ServiceConfiguration buildConfiguration(List<String> servicePrefixes) {
+		return new ServiceConfigurationImpl(servicePrefixes);
 	}
 
 	/** provides the CLI parameter parsing implementation */
@@ -93,27 +93,32 @@ public class Configuration {
 
 		private Properties loadedProperties;
 		private String loadedConfFilePath = null;
+		private List<String> servicePrefixes = Lists.newArrayList();
 
-		public ServiceConfigurationImpl() {
+		public ServiceConfigurationImpl(List<String> prefixes) {
 			loadedProperties = new Properties();
+			servicePrefixes.addAll(prefixes);
 		}
 
 		private void overrideWithEnvProvidedConfiguration() {
-
-			ArrayList<String> envVarList = Lists.newArrayList(
-					"KAFKA_BOOTSTRAP_SERVERS", 
-					"KAFKA_SECURITY_PROTOCOL", 
-					"KAFKA_SASL_MECHANISM",
-					"KAFKA_SASL_JAAS_CONFIG");
+		
+			List<String> overrideKeys = Lists.newArrayList();
+			Map<String,String> allEnvVars = System.getenv();
 			
-			for (String envVar : envVarList) {
-				String propertyName = envVar.toLowerCase().replace(ENVVAR_SEPARATOR, PROPERTY_SEPARATOR);
-				String propertyValue = System.getenv(envVar);
+			allEnvVars.keySet().forEach( p -> {
+				servicePrefixes.forEach( o -> {
+					if (p.startsWith(o.toUpperCase()+"_"))
+						overrideKeys.add(p);
+				});
+			});
+	
+			overrideKeys.forEach( k -> {
+				String propertyName = k.toLowerCase().replace(ENVVAR_SEPARATOR, PROPERTY_SEPARATOR);
+				String propertyValue = System.getenv(k);
 				if (!Strings.isNullOrEmpty(propertyValue)) {
-					System.out.println("ZDBG OVERRIDING PROP BY ENV  "+propertyName+"="+propertyValue);
 					loadedProperties.put(propertyName, propertyValue);
 				}
-			}
+			});
 		}
 
 		@Override
