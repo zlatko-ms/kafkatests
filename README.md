@@ -14,6 +14,10 @@ This is a java project using maven, so in order to build the application please 
 mvn clean package
 ```
 
+### Binary distribution 
+
+A tarball containing the jar archive and sample configuration file is available as an artifact of the Build & Deploy pipeline.
+
 ### Docker Container
 
 The container is build upon changed and deployed to the the [Docker Hub](https://hub.docker.com/repository/docker/zlatkoa/kafkatests)
@@ -64,6 +68,14 @@ java -jar target/azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
 Where : 
 - **serviceName** is one of the following : **consumer** , **producer** or **metadata**
 - **configurationFle** is a path to a valid configuration properties file
+
+#### Consumer
+
+The **producer** service sends batches of messages on a given topic, that can be created on the fly.
+
+The **consumer** service reads messgages from a given topic.
+
+The **metadata** service gathers information on the cluster (nodes) and on the topics (partitions, replication, ... ) available on the cluster.
 
 ## Run from Docker
 
