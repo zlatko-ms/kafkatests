@@ -81,7 +81,7 @@ The **metadata** service gathers information on the cluster (nodes) and on the t
 
 ## Run from Docker
 
-Just ensure that the foloowing evironnement variables are passed to the docker executor : 
+Unless you are running against a local kafka cluster witout any authentication, please ensure that the following evironnement variables are passed to the docker executor : 
 
 KAFKA_BOOTSTRAP_SERVERS
 
