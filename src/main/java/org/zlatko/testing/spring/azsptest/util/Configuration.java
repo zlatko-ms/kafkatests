@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest;
+package org.zlatko.testing.spring.azsptest.util;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest;
+package org.zlatko.testing.spring.azsptest.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
-import org.zlatko.testing.spring.azsptest.Configuration.ServiceConfiguration;
+import org.zlatko.testing.spring.azsptest.util.Configuration;
+import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 class ServiceConfigurationTest {
 	

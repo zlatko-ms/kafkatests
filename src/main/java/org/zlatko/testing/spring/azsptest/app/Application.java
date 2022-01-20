@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest;
+package org.zlatko.testing.spring.azsptest.app;
 
 import java.io.File;
 import java.util.Optional;
@@ -8,8 +8,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.zlatko.testing.spring.azsptest.Configuration.CommandLineParameters;
-import org.zlatko.testing.spring.azsptest.Configuration.ServiceConfiguration;
+import org.zlatko.testing.spring.azsptest.kafka.Kafka;
+import org.zlatko.testing.spring.azsptest.util.Configuration;
+import org.zlatko.testing.spring.azsptest.util.Configuration.CommandLineParameters;
+import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import lombok.extern.java.Log;
 

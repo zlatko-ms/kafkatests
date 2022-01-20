@@ -1,11 +1,12 @@
-package org.zlatko.testing.spring.azsptest;
+package org.zlatko.testing.spring.azsptest.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.zlatko.testing.spring.azsptest.Configuration.CommandLineParameters;
+import org.zlatko.testing.spring.azsptest.util.Configuration;
+import org.zlatko.testing.spring.azsptest.util.Configuration.CommandLineParameters;
 
 class CommandLineParametersTest {
 
