@@ -49,9 +49,11 @@ An example of a configuration file for connecting to an Azure Event Hub can be f
 
 ## Override via Environnement variables
 
-In order to avoid storing sensible infromation in the configuration file, the application will overload all the **kafka** prefixed properties with the values of environnement variables starting with KAFKA.
+In order to avoid storing sensible infromation in the configuration file, the application will overload all the **serviceName** prefixed properties with the values of environnement variables starting with KAFKA.
 
-For instance to overload the kafka.bootstrap.servers property, define the KAFKA_BOOTSTRAP_SERVERS environnement variable. The Env variable will take precedence over the property.
+For instance, in order to overload : 
+- kafka.bootstrap.servers property, define the KAFKA_BOOTSTRAP_SERVERS environnement variable
+- producer.messages.max, define the PRODUCER_MESSAGES_MAX environnement variable. 
 
 This system provides a conventient way to run the application in a container, by propagating sensible values via the environnement variables, which can be easly  secured on your CI/CD side.
 
