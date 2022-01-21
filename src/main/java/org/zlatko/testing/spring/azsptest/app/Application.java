@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.zlatko.testing.spring.azsptest.kafka.Kafka;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestService;
 import org.zlatko.testing.spring.azsptest.util.Configuration;
 import org.zlatko.testing.spring.azsptest.util.Configuration.CommandLineParameters;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;

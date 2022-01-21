@@ -45,11 +45,17 @@ You can also test the topic partitionning, the following partioners are availabl
 
 #### Consumer
 
-The consumer is a simple message reader that will connect to a topic and read the messages.
+The **consumer** is a simple message reader that will connect to a topic and read the messages.
 
-#### Metadata
+#### Metadata_Kafka
 
-The metadata is a simple metadata fetch service. It will gather the info on the cluster nodes and topics and display it on the console. Very usefull to determine if your cloud native solution can be used with complex kafka orchestration requiring metadata processing.
+The **metadata_kafka** is a simple metadata fetch service using the Kafka Admin API.
+
+It will gather the info on the cluster nodes and topics and display it on the console. 
+
+Very usefull to determine if your cloud native solution can be used with complex kafka orchestration requiring metadata processing.
+
+Currently it shows that there is no compatibility on the fetchMetadata() between the Kafka Admin client and the Azure Event Hub. 
 
 ### Configuration 
 
@@ -61,7 +67,7 @@ The **consumer** perfix is used to configure all the consumer properties, mainly
 
 The **producer** prefix is used to configure all the producer properties, mainly related to the number of messages to send (-1 for infinite loop) and to the batch size.
 
-The **metadata** prefix is used to configure the metadata fetcher. Default settings apply, but you can disable some steps by uncommeting the settings in the sample conf file.
+The **metadata_kafka** prefix is used to configure the Kafka metadata fetcher. Default settings apply, but you can disable some steps by uncommeting the settings in the sample conf file.
 
 An example of the configuration file for connecting to a local kafka cluster can be found in [src/run/conf/configuration.properties](src/run/conf/configuration.properties) .
 
