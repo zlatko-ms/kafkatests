@@ -21,36 +21,35 @@ public final class Services {
 
 	/** defines the kafka test service interface */
 	public interface TestService {
-
 		// returns the name of the service
 		public String getName();
-
 		// returns the service workload type
 		public ServiceType getServiceType();
-
 		// runs the service
 		public void run();
-
 		// returns general Kafka level properties (for joining the cluster)
 		public Properties getKafkaProperties();
-
 		// returns the specific service workload properties
 		public Properties getServiceProperties();
 	}
 
 	/** basic interface for getting metadata */
 	public interface MetadataTestService extends TestService {
+		// returns one description line per node if node fetching is supported, Optional.Empty if not supported
 		Optional<List<String>> getNodesDescriptionDescLines();
+		// returns one description line per topic if topc fetching is supported, Optional.Empty if not supported
 		Optional<List<String>> getTopicsDescriptionDescLines();
+		// returns one description line per consumer groups if cg fetching is supported, Optional.Empty if not supported
 		Optional<List<String>> getConsumerGroupDescLines();
 	}
 	
 	/** simple kafka message abstraction */
 	public interface PubSubMessage {
+		// message key
 		String getKey();
-
+		// message value (as object)
 		Object getValue();
-
+		// message value as Json String
 		String getValueAsJson();
 	}
 
