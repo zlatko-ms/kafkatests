@@ -3,10 +3,12 @@ kafka.bootstrap.servers=kafkatests.servicebus.windows.net:9093
 kafka.client.id=azkafkatest42
 kafka.security.protocol=SASL_SSL
 kafka.sasl.mechanism=PLAIN
+
+## WARN : sensible information should be provided via env variables, not conf file !
 kafka.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://kafkatests.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXXX";
 
 ## producer settings
-producer.topic.name=ztopic73
+producer.topic.name=mytopicname
 producer.topic.create=true
 producer.topic.create.partitions=3
 producer.topic.create.replication=2
@@ -16,11 +18,24 @@ producer.wait.after.batch.ms=1000
 producer.topic.partitioner=even_odd
 
 ## consumer settings
-consumer.topic.name=ztopic73
+consumer.topic.name=mytopicname
 consumer.poll.duration.ms=1000
 consumer.wait.after.poll.ms=1000
 consumer.group.id=ztesting
 consumer.message.unit.print=true
 
-## metadata fetchin settings
+## metadata fetching settings
 metadata.describe.cluster=true
+
+## azure metadata fetching settings
+## WARN : sensible information should be provided via env variables, not conf file ! 
+metadata_azure.auth.client.id=XYZ
+## WARN : sensible information should be provided via env variables, not conf file !
+metadata_azure.auth.client.secret=XYZ
+## WARN : sensible information should be provided via env variables, not conf file ! 
+metadata_azure.auth.tenant.id=XYZ
+## WARN : sensible information should be provided via env variables, not conf file ! 
+metadata_azure.auth.subscription.id=XYZ
+## the ressource group where your event hub lives
+metadata_azure.rg.name=XYZ
+

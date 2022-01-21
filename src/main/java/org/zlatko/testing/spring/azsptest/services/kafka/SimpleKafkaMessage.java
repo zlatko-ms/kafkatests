@@ -1,8 +1,8 @@
-package org.zlatko.testing.spring.azsptest.kafka;
+package org.zlatko.testing.spring.azsptest.services.kafka;
 
 import java.util.UUID;
 
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestMessage;
+import org.zlatko.testing.spring.azsptest.services.Services.PubSubMessage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -12,7 +12,7 @@ import lombok.SneakyThrows;
 
 /** Implementation of a simple kafka , string transported, key/value message */
 @Getter
-public class SimpleKafkaMessage implements KafkaTestMessage {
+public class SimpleKafkaMessage implements PubSubMessage {
 
 	static ObjectWriter jsonObjectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 

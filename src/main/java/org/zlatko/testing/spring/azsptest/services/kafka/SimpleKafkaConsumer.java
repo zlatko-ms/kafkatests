@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.kafka;
+package org.zlatko.testing.spring.azsptest.services.kafka;
 
 import java.util.Collections;
 
@@ -7,8 +7,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestService;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.TestWorkloadType;
+import org.zlatko.testing.spring.azsptest.services.Services.TestService;
+import org.zlatko.testing.spring.azsptest.services.AbstractBaseService;
+import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import lombok.SneakyThrows;
@@ -16,7 +17,7 @@ import lombok.extern.java.Log;
 
 /** simple kafka consumer test service */
 @Log
-final class SimpleKafkaConsumer extends BaseKafkaService implements KafkaTestService {
+public class SimpleKafkaConsumer extends AbstractBaseService implements TestService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_POLL_DURATION_MS = "poll.interval.ms";
@@ -35,7 +36,7 @@ final class SimpleKafkaConsumer extends BaseKafkaService implements KafkaTestSer
 	
 	public SimpleKafkaConsumer(ServiceConfiguration configuration) {
 
-		super(TestWorkloadType.CONSUMER, configuration);
+		super(ServiceType.CONSUMER, configuration);
 
 		topicName = getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_NAME, "");
 		pollIntervalMs = Long.parseLong(

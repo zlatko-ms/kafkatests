@@ -4,7 +4,7 @@ Simple Java Spring Boot app for testing Kafka compliant brokers.
 
 Use Cases : 
 
-- test the combatibility with cloud native event infrastructures (such as Azure Event Hub)
+- test the compatibility with cloud native event infrastructures (such as Azure Event Hub)
 - as a base for Event driven processing to illustrate a number of consumer/producer use cases (spring boot makes it very easy to add http handlers on top).
 
 ## Distributions
@@ -24,14 +24,14 @@ mvn clean package
 
 The application takes two parameters : 
 
-- the test service to execute [producer|consumer|metadata]
+- the test service to execute [producer|consumer|metadata_kafka|metadata_azure]
 - the path to the configuration file 
 
 ### Services
 
 #### Producer
 
-The producer is a simple message producing service.
+The **producer** is a simple message producing service.
 
 You can define on which topic you'll send the messages, the batch size , the wait between batches, as well as a maximum number of messages to send.
 
@@ -57,6 +57,17 @@ Very usefull to determine if your cloud native solution can be used with complex
 
 Currently it shows that there is no compatibility on the fetchMetadata() between the Kafka Admin client and the Azure Event Hub. 
 
+#### Metadata_Azure
+
+The **metadata_azure** is a simple metadata fetch service of the Azure Event Hubs that uses the Azure Java SDK.
+
+The service will inspect your Azure Event Hub and report information on your namespaces (aka topics) and consumer groups.
+
+In order to use it you'll need to provide the azure SPN token infromation as well as the resource group where your Event Hub lives.
+
+See the configuration properties for azure for more details.
+
+
 ### Configuration 
 
 The configuration file uses a properties syntax, each property being prefixed by the service it is related to.
@@ -68,6 +79,8 @@ The **consumer** perfix is used to configure all the consumer properties, mainly
 The **producer** prefix is used to configure all the producer properties, mainly related to the number of messages to send (-1 for infinite loop) and to the batch size.
 
 The **metadata_kafka** prefix is used to configure the Kafka metadata fetcher. Default settings apply, but you can disable some steps by uncommeting the settings in the sample conf file.
+
+The **metadata_azure** prefix is used to configure the Azure Event Hub metadata fetcher. 
 
 An example of the configuration file for connecting to a local kafka cluster can be found in [src/run/conf/configuration.properties](src/run/conf/configuration.properties) .
 
@@ -94,7 +107,7 @@ java -jar azsptest-<version>-SNAPSHOT.jar serviceName configurationFle
 ```
 
 Where : 
-- **serviceName** is one of the following : **consumer** , **producer** or **metadata**
+- **serviceName** is one of the following : **consumer** , **producer**, **metadata_kafka** or **metadata_azure**
 - **configurationFle** is a path to a valid configuration properties file
 
 The jar file will be created under the target dir once you perform the build process.
