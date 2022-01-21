@@ -3,7 +3,6 @@ package org.zlatko.testing.spring.azsptest.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.kafka;
+package org.zlatko.testing.spring.azsptest.services.kafka;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,11 +17,12 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestMessage;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestService;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.TestWorkloadType;
-import org.zlatko.testing.spring.azsptest.kafka.partition.EvenOddPartitioner;
-import org.zlatko.testing.spring.azsptest.kafka.partition.EvenOddPrimePartioner;
+import org.zlatko.testing.spring.azsptest.services.AbstractBaseService;
+import org.zlatko.testing.spring.azsptest.services.Services.PubSubMessage;
+import org.zlatko.testing.spring.azsptest.services.Services.TestService;
+import org.zlatko.testing.spring.azsptest.services.kafka.partitions.EvenOddPartitioner;
+import org.zlatko.testing.spring.azsptest.services.kafka.partitions.EvenOddPrimePartioner;
+import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.base.Joiner;
@@ -31,7 +32,7 @@ import lombok.extern.java.Log;
 
 /** simple kafka producer test service */
 @Log
-final class SimpleKafkaProducer extends BaseKafkaService implements KafkaTestService {
+public class SimpleKafkaProducer extends AbstractBaseService implements TestService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_BATCH_SIZE = "messages.per.batch";
@@ -82,7 +83,7 @@ final class SimpleKafkaProducer extends BaseKafkaService implements KafkaTestSer
 
 	public SimpleKafkaProducer(ServiceConfiguration configuration) {
 
-		super(TestWorkloadType.PRODUCER, configuration);
+		super(ServiceType.PRODUCER, configuration);
 
 		messagesPerBatch = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_BATCH_SIZE, "1"));
 		waitAfterBatchMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_BATCH, "5000"));
@@ -128,23 +129,23 @@ final class SimpleKafkaProducer extends BaseKafkaService implements KafkaTestSer
 		}
 	}
 
-	private List<KafkaTestMessage> buildBatch() {
-		List<KafkaTestMessage> batch = new ArrayList<KafkaTestMessage>();
+	private List<PubSubMessage> buildBatch() {
+		List<PubSubMessage> batch = new ArrayList<PubSubMessage>();
 		for (int i = 0; i < messagesPerBatch; i++) {
 			Properties p = new Properties();
 			p.put("message", "hello-" + (messageCounter + i));
-			KafkaTestMessage msg = new SimpleKafkaMessage(p);
+			PubSubMessage msg = new SimpleKafkaMessage(p);
 			batch.add(msg);
 		}
 		return batch;
 	}
 
 	@SneakyThrows
-	private void sendBatchToTopic(String topicName, List<KafkaTestMessage> messages) {
+	private void sendBatchToTopic(String topicName, List<PubSubMessage> messages) {
 
 		long resultingOffset = 0;
 		try {
-			for (KafkaTestMessage msg : messages) {
+			for (PubSubMessage msg : messages) {
 				final RecordMetadata rm = producer.send(new ProducerRecord<String, String>(topicName,
 						msg.getKey().toString(), msg.getValueAsJson())).get();
 				resultingOffset = rm.offset();
@@ -166,7 +167,7 @@ final class SimpleKafkaProducer extends BaseKafkaService implements KafkaTestSer
 		if (topicCreate)
 			ensureTopicExists();
 		while (true) {
-			List<KafkaTestMessage> messages = buildBatch();
+			List<PubSubMessage> messages = buildBatch();
 			sendBatchToTopic(topicName, messages);
 			if ((messageLimit > 0) && (messageCounter >= messageLimit)) {
 				log.info(String.format(LogMessageConstants.MESSAGE_LIMIT_REACHED, messageLimit));

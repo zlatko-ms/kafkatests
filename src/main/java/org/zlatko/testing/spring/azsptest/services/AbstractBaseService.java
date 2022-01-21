@@ -1,24 +1,24 @@
-package org.zlatko.testing.spring.azsptest.kafka;
+package org.zlatko.testing.spring.azsptest.services;
 
 import java.util.Properties;
 
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.KafkaTestService;
-import org.zlatko.testing.spring.azsptest.kafka.Kafka.TestWorkloadType;
+import org.zlatko.testing.spring.azsptest.services.Services.TestService;
+import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 /**
  * base kafka test service class, provides common configuration processing
  * facilities
  */
-abstract class BaseKafkaService implements KafkaTestService {
+public abstract class AbstractBaseService implements TestService {
 
 	private final static String KAFKA_SHARED_SERVICE = "kafka";
 
 	private Properties kafkaProperties;
 	private Properties serviceProperties;
-	private TestWorkloadType serviceType;
+	private ServiceType serviceType;
 
-	protected BaseKafkaService(TestWorkloadType serviceType, ServiceConfiguration appConfig) {
+	protected AbstractBaseService(ServiceType serviceType, ServiceConfiguration appConfig) {
 		this.serviceType = serviceType;
 		kafkaProperties = new Properties();
 		kafkaProperties.putAll(appConfig.getServiceConfiguration(KAFKA_SHARED_SERVICE));
@@ -31,7 +31,7 @@ abstract class BaseKafkaService implements KafkaTestService {
 	}
 
 	@Override
-	public TestWorkloadType getServiceType() {
+	public ServiceType getServiceType() {
 		return this.serviceType;
 	}
 

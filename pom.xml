@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>org.zlatko.testing.spring</groupId>
 	<artifactId>azsptest</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<name>azsptest</name>
 	<description>Collection of Kafka consumer/producer style tools</description>
 	<properties>
@@ -61,6 +61,22 @@
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.azure.resourcemanager</groupId>
+			<artifactId>azure-resourcemanager</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>azure-client-authentication</artifactId>
+			<version>1.7.13</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+			<version>1.4.1</version>
 		</dependency>
 	</dependencies>
 

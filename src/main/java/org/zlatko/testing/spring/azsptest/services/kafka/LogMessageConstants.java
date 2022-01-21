@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.kafka;
+package org.zlatko.testing.spring.azsptest.services.kafka;
 
 /** centralizes all log messages for the kafka services */
 class LogMessageConstants {
