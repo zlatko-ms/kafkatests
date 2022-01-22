@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.kafka.partitions;
+package org.zlatko.testing.spring.azsptest.services.provider.kafka;
 
 import java.util.Map;
 

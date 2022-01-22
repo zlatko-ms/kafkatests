@@ -1,16 +1,16 @@
-package org.zlatko.testing.spring.azsptest.services;
+package org.zlatko.testing.spring.azsptest.services.base;
 
 import java.util.Properties;
 
-import org.zlatko.testing.spring.azsptest.services.Services.TestService;
-import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
+import org.zlatko.testing.spring.azsptest.services.api.ConfigurableService;
+import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 /**
  * base kafka test service class, provides common configuration processing
  * facilities
  */
-public abstract class AbstractBaseService implements TestService {
+public abstract class AbstractBaseService implements ConfigurableService {
 
 	private final static String KAFKA_SHARED_SERVICE = "kafka";
 

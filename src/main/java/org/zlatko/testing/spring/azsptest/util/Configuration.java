@@ -96,6 +96,7 @@ public class Configuration {
 
 		public ServiceConfigurationImpl(List<String> prefixes) {
 			loadedProperties = new Properties();
+			servicePrefixes.add("kafka");
 			servicePrefixes.addAll(prefixes);
 		}
 
@@ -104,10 +105,11 @@ public class Configuration {
 			List<String> overrideKeys = Lists.newArrayList();
 			Map<String,String> allEnvVars = System.getenv();
 			
-			allEnvVars.keySet().forEach( p -> {
-				servicePrefixes.forEach( o -> {
-					if (p.startsWith(o.toUpperCase()+"_"))
-						overrideKeys.add(p);
+			allEnvVars.keySet().forEach( envVarName -> {
+				servicePrefixes.forEach( servicePrefix -> {
+					String prefix = servicePrefix.toUpperCase()+"_";
+					if (envVarName.startsWith(prefix))
+						overrideKeys.add(envVarName);
 				});
 			});
 	
