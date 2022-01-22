@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.kafka.partitions;
+package org.zlatko.testing.spring.azsptest.services.provider.kafka;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;

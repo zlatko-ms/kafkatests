@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.kafka;
+package org.zlatko.testing.spring.azsptest.services.provider.kafka;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,9 +10,16 @@ import org.apache.kafka.clients.admin.ConsumerGroupListing;
 import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.admin.TopicListing;
-import org.zlatko.testing.spring.azsptest.services.AbstractBaseMetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.Services.MetadataTestService;
-import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
+import org.apache.kafka.common.TopicPartitionInfo;
+import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataConsumerGroup;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataFetcher;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataNode;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataTopic;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataNodeDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataTopicDesc;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.base.Splitter;
@@ -24,7 +31,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher implements MetadataTestService {
+public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher implements MetadataFetcher {
 
 	private final class ConfigurationProperties {
 		static final String CONF_DESCRIBE_INTERNAL_TOPICS = "describe.internal.topics";
@@ -52,18 +59,18 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 		describeTopicList.addAll(getTopicsToDescribe());
 		adminClient = AdminClient.create(getKafkaProperties());
 	}
-
+	
 	@Override
-	public Optional<List<String>> getNodesDescriptionDescLines() {
-		List<String> nodes = Lists.newArrayList();
+	public Optional<List<MetadataNode>> getNodesDescriptionDescLines() {
+		List<MetadataNode> nodes = Lists.newArrayList();
 		try {
 			DescribeClusterResult clusterDesc = adminClient.describeCluster();
 			clusterDesc.nodes().get().forEach(node -> {
-				nodes.add(String.format("host=%s id=%s rack=%s, port=%s", 
-						node.host(), 
-						node.idString(),
-						(node.hasRack() ? node.rack() : "none"),
-						node.port()));
+				
+				nodes.add(MetadataNodeDesc.builder(node.host())
+					.withId(node.idString())
+					.withPort(node.port())
+					.withRack(node.hasRack() ? node.rack() : null));
 			});
 
 		} catch (Throwable e) {
@@ -73,29 +80,30 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 	}
 
 	@Override
-	public Optional<List<String>> getTopicsDescriptionDescLines() {
-		List<String> topicsDesc = Lists.newArrayList();
+	public Optional<List<MetadataTopic>> getTopicsDescriptionDescLines() {
+		List<MetadataTopic> topicsDesc = Lists.newArrayList();
 
 		try {
 
 			if (describeTopicList.isEmpty()) {
 				describeTopicList.addAll(fetchAllTopicNames());
 			}
-			//log.info(String.format("Fetching %d topic list metadata", describeTopicList.size()));
-			Map<String, TopicDescription> topics = adminClient.describeTopics(describeTopicList).all().get();
-			//log.info(String.format("Fetched %d topic list metadata", topics.size()));
 
+			Map<String, TopicDescription> topics = adminClient.describeTopics(describeTopicList).all().get();
 			topics.values().forEach(topic -> {
 
-				StringBuilder sb = new StringBuilder("name=" + topic.name());
-				sb.append(" partitions=" + topic.partitions().size());
-				sb.append(" internal=" + topic.isInternal());
-				sb.append(" id=" + topic.topicId().toString());
-				topic.partitions().forEach(partition -> {
-					sb.append(" partition_leader=" + partition.leader().host());
-					sb.append(" replicas=" + partition.replicas().size());
-				});
-				topicsDesc.add(sb.toString());
+				
+				int replicaCount = 0;
+				List<TopicPartitionInfo> partitions = topic.partitions();
+				for (TopicPartitionInfo tpi : partitions) {
+					replicaCount+=tpi.replicas().size();
+				}
+					
+				topicsDesc.add(MetadataTopicDesc.builder(topic.name())
+					.withPartitions(topic.partitions().size())
+					.withReplication(replicaCount)
+					.withId(topic.topicId().toString())
+					.asInternal(topic.isInternal()));
 			});
 
 		} catch (Throwable e) {
@@ -107,12 +115,12 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 
 	@Override
 	
-	public Optional<List<String>> getConsumerGroupDescLines() {
-		List<String> cgDescs = Lists.newArrayList();
+	public Optional<List<MetadataConsumerGroup>> getConsumerGroupDescLines() {
+		List<MetadataConsumerGroup> cgDescs = Lists.newArrayList();
 		try {
 			Collection<ConsumerGroupListing> consumerGroupList = adminClient.listConsumerGroups().all().get();
 			consumerGroupList.forEach(cg -> {
-				cgDescs.add(String.format("name=%s isSimple=%b", cg.groupId(), cg.isSimpleConsumerGroup()));
+				cgDescs.add(MetadataConsumerGroupDesc.builder(cg.groupId()).asSimple(cg.isSimpleConsumerGroup()));
 			});
 		} catch (Throwable e) {
 			log.info(String.format("Error while fetching consumer groups description " + e.getMessage()));
@@ -132,4 +140,6 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 		log.info(String.format("Listed %d topics from the cluster",res.size()));
 		return res;
 	}
+
+
 }

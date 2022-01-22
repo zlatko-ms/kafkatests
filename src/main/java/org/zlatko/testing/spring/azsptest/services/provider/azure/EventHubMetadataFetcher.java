@@ -1,12 +1,17 @@
-package org.zlatko.testing.spring.azsptest.services.azure;
+package org.zlatko.testing.spring.azsptest.services.provider.azure;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import org.zlatko.testing.spring.azsptest.services.AbstractBaseMetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.Services.MetadataTestService;
-import org.zlatko.testing.spring.azsptest.services.Services.ServiceType;
+import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataConsumerGroup;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataFetcher;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataNode;
+import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataTopic;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataTopicDesc;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.azure.core.management.AzureEnvironment;
@@ -19,10 +24,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-import lombok.extern.java.Log;
-
-@Log
-public class MetadataEventHubTestService extends AbstractBaseMetadataFetcher implements MetadataTestService {
+public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher implements MetadataFetcher {
 
 	private static class ConfigurationProperties {
 		static final String CONF_CLIENT_ID = "auth.client.id";
@@ -62,7 +64,7 @@ public class MetadataEventHubTestService extends AbstractBaseMetadataFetcher imp
 		}
 	}
 
-	public MetadataEventHubTestService(ServiceConfiguration appConfig) {
+	public EventHubMetadataFetcher(ServiceConfiguration appConfig) {
 		super(ServiceType.METADATA_AZURE, appConfig);
 
 		ressourceGroupName = getMandatoryProperty(ConfigurationProperties.CONF_RGNAME);
@@ -70,39 +72,43 @@ public class MetadataEventHubTestService extends AbstractBaseMetadataFetcher imp
 		String tenantId = getMandatoryProperty(ConfigurationProperties.CONF_TENANT_ID);
 		String clientId = getMandatoryProperty(ConfigurationProperties.CONF_CLIENT_ID);
 		String secret = getMandatoryProperty(ConfigurationProperties.CONF_CLIENT_SECRET);
+		ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
+				.clientId(clientId)
+				.clientSecret(secret)
+				.tenantId(tenantId)
+				.build();
+		
 		eventHubNamespace = getNamespaceFromKafkaProps();
-
-		ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder().clientId(clientId)
-				.clientSecret(secret).tenantId(tenantId).build();
 		AzureProfile azureProfile = new AzureProfile(tenantId, subscriptionId, AzureEnvironment.AZURE);
-
 		eventHubs = EventHubsManager.authenticate(clientSecretCredential, azureProfile).eventHubs();
+
 	}
 
 	@Override
-	public Optional<List<String>> getNodesDescriptionDescLines() {
-		// there are no nodes on a cloud managed service
+	public Optional<List<MetadataNode>> getNodesDescriptionDescLines() {
+		// there are no nodes on a manages solution such as Azure Event Hubs
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<List<String>> getTopicsDescriptionDescLines() {
-		List<String> topics = Lists.newArrayList();
+	public Optional<List<MetadataTopic>> getTopicsDescriptionDescLines() {
+		List<MetadataTopic> topics = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).forEach(eh -> {
-			topics.add(String.format("name=%s partitions=%d", eh.name(), eh.partitionIds().size()));
+			topics.add(MetadataTopicDesc.builder(eh.name()).withPartitions(eh.partitionIds().size()));
 		});
 		return Optional.of(topics);
 	}
 
 	@Override
-	public Optional<List<String>> getConsumerGroupDescLines() {
-		List<String> cgs = Lists.newArrayList();
+	public Optional<List<MetadataConsumerGroup>> getConsumerGroupDescLines() {
+		List<MetadataConsumerGroup> cgs = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).stream().forEach(eh -> {
 			eh.listConsumerGroups().stream().forEach(cg -> {
-				cgs.add(String.format("name=%s", cg.name()));
+				cgs.add(MetadataConsumerGroupDesc.builder(cg.name()).forTopic(eh.name()).withId(cg.id()));
 			});
 		});
 		return Optional.of(cgs);
 	}
+
 
 }
