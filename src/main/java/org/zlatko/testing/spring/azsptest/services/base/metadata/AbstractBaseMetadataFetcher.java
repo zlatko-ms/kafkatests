@@ -27,23 +27,8 @@ public abstract class AbstractBaseMetadataFetcher extends AbstractBaseService im
 	protected final static String ITEM_TOPICS = "### [ Topics          ] #######################################";
 	protected final static String ITEM_CGS    = "### [ Consumer Groups ] ##########################################";
 	
-	protected final static String ITEM_NODE   = "[>] node";
-	protected final static String ITEM_CG     = "[>] consumer_group";
-	protected final static String ITEM_TOPIC  = "[>] topic";
-	
 	protected AbstractBaseMetadataFetcher(ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
-	}
-
-	protected void addToReport(List<String> report,String header,String operation,String item,Optional<List<MetadataStringDescriptible>> explored) {
-		report.add(header);
-		if (explored.isEmpty()) {
-			log.warning(String.format("%s is not supported for service %s",operation,getServiceType().name().toLowerCase()));
-		} else {
-			explored.get().forEach( desc -> {
-				report.add(desc.getDescription());
-			});
-		}
 	}
 	
 	private void logUnsupportedOperation(String operation) {
