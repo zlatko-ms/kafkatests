@@ -2,12 +2,12 @@ package org.zlatko.testing.spring.azsptest.services.base.metadata;
 
 import java.util.Optional;
 
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataNode;
+import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 
 import lombok.Getter;
 
 @Getter
-public class MetadataNodeDesc implements MetadataNode {
+public class MetadataNodeDesc implements Metadata.Node {
 	
 	private String name;
 	private Optional<String> rack=Optional.empty();

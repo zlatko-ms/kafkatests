@@ -4,101 +4,75 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
-import org.zlatko.testing.spring.azsptest.services.api.pubsub.PubSubMessage;
-import org.zlatko.testing.spring.azsptest.services.api.pubsub.PubSubProducer;
+import org.zlatko.testing.spring.azsptest.services.api.PubSub;
+import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.services.base.AbstractBaseService;
-import org.zlatko.testing.spring.azsptest.services.base.SimplePubSubMessage;
+import org.zlatko.testing.spring.azsptest.services.base.PubSubPerformanceTracker;
+import org.zlatko.testing.spring.azsptest.services.base.SizedPubSubMessage;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import lombok.extern.java.Log;
 
 @Log
-public abstract class AbstractBaseProducer extends AbstractBaseService implements PubSubProducer {
+public abstract class AbstractBaseProducer extends AbstractBaseService implements PubSub.ProducerService {
 	
-	protected AbstractBaseProducer(ServiceType serviceType, ServiceConfiguration appConfig) {
+	private PubSubPerformanceTracker perfTracker = new PubSubPerformanceTracker();
+
+	protected AbstractBaseProducer(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
 	}
 
-	private int producedMessageCount = 0;
-	private int producedMessageSizeBytes= 0;
-	private long producingPassedTimeMs = 0;
-	
-	@Override
-	public int getMessageCount() {
-		return producedMessageCount;
-	}
-	
-	@Override
-	public void addMessagesProducedCount(int messages) {
-		producedMessageCount+=messages;
-	}
-	
-	@Override
-	public void addProcessingTimeMs(long timeSpentMs) {
-		producingPassedTimeMs+=timeSpentMs;
-	}
-	
-	@Override
-	public void addMessagesProducedSizeBytes(long sizeInBytes) {
-		producedMessageSizeBytes+=sizeInBytes;	
-	}
-	
-	
-	@Override
-	public double getMessagesPerSecond() {
-		double seconds = producingPassedTimeMs / 1000;
-		return producedMessageCount/seconds;
-	}
-	
-	@Override
-	public double getMessagesTroughput() {
-		double seconds = producingPassedTimeMs / 1000;
-		return producedMessageSizeBytes / seconds;
-	}
-	
-	protected List<PubSubMessage> buildBatch() {
-		List<PubSubMessage> batch = new ArrayList<PubSubMessage>();
+	protected List<PubSub.Event> buildBatch() {
+		List<PubSub.Event> batch = new ArrayList<PubSub.Event>();
 		for (int i = 0; i < getMessageBatchSize(); i++) {
+			int currentMessagesTotal = perfTracker.getTotalMessagesCount() ;
 			Properties p = new Properties();
-			p.put("message", "hello-" + (getMessageCount() + i));
-			PubSubMessage msg = new SimplePubSubMessage(p);
+			p.put("message", "hello-" + (currentMessagesTotal  + i));
+			PubSub.Event msg = new SizedPubSubMessage(currentMessagesTotal + i,"message-",getEventSize());
 			batch.add(msg);
 		}
 		return batch;
 	}
-
+	
 	@SuppressWarnings("static-access")
 	@Override
 	public void run() {
+		
 		boolean keepProcessing=true; 
 		
 		ensureTopicCreated();
 	
 		while (keepProcessing) {
 			
-			log.info(String.format("bulding batch of %d messages", getMessageBatchSize()));
-			List<PubSubMessage> messages = buildBatch();
+			log.info(String.format("bulding batch of %d messages with %s payload [%s k]",
+					getMessageBatchSize(), 
+					getEventSize().name(),
+					getEventSize().getSize()));
+			
+			List<PubSub.Event> messages = buildBatch();
 			
 			log.info("sending batch");
 			long startTime = System.currentTimeMillis();
-			sendMessages(messages);
-			long endTime = System.currentTimeMillis();
-			log.info("batch sent");
+			sendEvents(messages);
+			long duration = System.currentTimeMillis() - startTime; 
+			log.info( String.format("batch sent in %d ms",duration));
 			messages.forEach( m -> {
-				addMessagesProducedSizeBytes(m.getValueAsJson().length());
+				perfTracker.increaseProcessingPayloadSizeBytes(PubSubPerformanceTracker.getBytesInString(m.getValueAsJson()));
 			});
-			addMessagesProducedCount(messages.size());
-			addProcessingTimeMs(endTime-startTime);
-			log.info(String.format("current stats thoughput=%s [b/s] speed=%s [messages/s] sent=%s limit=%s",
-					getMessagesTroughput(),
-					getMessagesPerSecond(),
-					getMessageCount(),
+			perfTracker.increaseMessageCount(messages.size());
+			perfTracker.increaseProcessingTimeMillisecs(duration);
+			log.info(String.format("current stats thoughput=%s kb/s speed=%s evts/s total_sent=%s limit=%s",
+					perfTracker.getReadbleThroughputKBs(),
+					perfTracker.getReadableThroughputEps(),
+					perfTracker.getTotalMessagesCount(),
 					getMaxMessagesToProduce().isPresent() ? getMaxMessagesToProduce().get() : "unlimited"));
+			
+			
+			log.info(String.format(";CSVSTATS;%s;%s;%s",perfTracker.getReadbleThroughputKBs(),perfTracker.getReadableThroughputEps(),perfTracker.getTotalMessagesCount()));
 			
 			long waitTime = getPostBatchWaitTimeMs();
 			if (waitTime>0) {
-				log.info(String.format("Wating %s millisecs before next batch", waitTime));
+				log.info(String.format("wating %s ms before next batch", waitTime));
 				try {
 					Thread.currentThread().sleep(waitTime);
 				} catch (Throwable t) {
@@ -107,13 +81,14 @@ public abstract class AbstractBaseProducer extends AbstractBaseService implement
 			}
 			
 			if ( getMaxMessagesToProduce().isPresent() ) {
-				keepProcessing = getMessageCount() <  getMaxMessagesToProduce().get();
+				keepProcessing = perfTracker.getTotalMessagesCount() <  getMaxMessagesToProduce().get();
 				if (!keepProcessing) {
 					log.info("all messages sent, finishing processing");
 				}
 			}
 		}
 	}
+
 	
 	
 }

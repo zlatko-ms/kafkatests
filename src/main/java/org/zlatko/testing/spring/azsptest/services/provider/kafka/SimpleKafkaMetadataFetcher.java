@@ -11,11 +11,8 @@ import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.admin.TopicListing;
 import org.apache.kafka.common.TopicPartitionInfo;
-import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataConsumerGroup;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataNode;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataTopic;
+import org.zlatko.testing.spring.azsptest.services.api.Metadata;
+import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataNodeDesc;
@@ -31,7 +28,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher implements MetadataFetcher {
+public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher implements Metadata.FetcherService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_DESCRIBE_INTERNAL_TOPICS = "describe.internal.topics";
@@ -54,15 +51,15 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 	}
 	
 	public SimpleKafkaMetadataFetcher(ServiceConfiguration appConfig) {
-		super(ServiceType.METADATA_KAFKA,appConfig);
+		super(Service.ServiceType.METADATA_KAFKA,appConfig);
 		describeTopicsPrivate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_INTERNAL_TOPICS, "false"));
 		describeTopicList.addAll(getTopicsToDescribe());
 		adminClient = AdminClient.create(getKafkaProperties());
 	}
 	
 	@Override
-	public Optional<List<MetadataNode>> getNodesDescriptionDescLines() {
-		List<MetadataNode> nodes = Lists.newArrayList();
+	public Optional<List<Metadata.Node>> getNodesDescriptionDescLines() {
+		List<Metadata.Node> nodes = Lists.newArrayList();
 		try {
 			DescribeClusterResult clusterDesc = adminClient.describeCluster();
 			clusterDesc.nodes().get().forEach(node -> {
@@ -80,8 +77,8 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 	}
 
 	@Override
-	public Optional<List<MetadataTopic>> getTopicsDescriptionDescLines() {
-		List<MetadataTopic> topicsDesc = Lists.newArrayList();
+	public Optional<List<Metadata.Topic>> getTopicsDescriptionDescLines() {
+		List<Metadata.Topic> topicsDesc = Lists.newArrayList();
 
 		try {
 
@@ -115,8 +112,8 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 
 	@Override
 	
-	public Optional<List<MetadataConsumerGroup>> getConsumerGroupDescLines() {
-		List<MetadataConsumerGroup> cgDescs = Lists.newArrayList();
+	public Optional<List<Metadata.ConsumerGroup>> getConsumerGroupDescLines() {
+		List<Metadata.ConsumerGroup> cgDescs = Lists.newArrayList();
 		try {
 			Collection<ConsumerGroupListing> consumerGroupList = adminClient.listConsumerGroups().all().get();
 			consumerGroupList.forEach(cg -> {

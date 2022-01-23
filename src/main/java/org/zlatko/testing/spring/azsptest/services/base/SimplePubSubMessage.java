@@ -2,19 +2,13 @@ package org.zlatko.testing.spring.azsptest.services.base;
 
 import java.util.UUID;
 
-import org.zlatko.testing.spring.azsptest.services.api.pubsub.PubSubMessage;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 
 import lombok.Getter;
-import lombok.SneakyThrows;
 
 /** Implementation of a simple kafka , string transported, key/value message */
 @Getter
-public class SimplePubSubMessage implements PubSubMessage {
-
-	static ObjectWriter jsonObjectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+public class SimplePubSubMessage extends AbstractBasePubSubMessage implements PubSub.Event {
 
 	private String key = UUID.randomUUID().toString();
 	private Object value;
@@ -28,9 +22,4 @@ public class SimplePubSubMessage implements PubSubMessage {
 		this.value = value;
 	}
 
-	@SneakyThrows
-	@Override
-	public String getValueAsJson() {
-		return jsonObjectWriter.writeValueAsString(value);
-	}
 }

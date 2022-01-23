@@ -17,8 +17,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
-import org.zlatko.testing.spring.azsptest.services.api.pubsub.PubSubMessage;
+import org.zlatko.testing.spring.azsptest.services.api.PubSub;
+import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.services.base.pubsub.AbstractBaseProducer;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
@@ -35,6 +35,7 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 		static final String CONF_BATCH_SIZE = "messages.per.batch";
 		static final String CONF_WAIT_AFTER_BATCH = "wait.after.batch.ms";
 		static final String CONF_MAX_MESSAGES = "messages.max";
+		static final String CONF_MESSAGE_SIZE= "messages.size";
 		static final String CONF_TOPIC_NAME = "topic.name";
 		static final String CONF_TOPIC_CREATE_PARTITIONS = "topic.create.partitions";
 		static final String CONF_TOPIC_CREATE_REPLICAS = "topics.create.replication";
@@ -62,6 +63,7 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 	private int topicsCreatePartitions;
 	private short topicsCreateReplication;
 	private String partitionerClassName;
+	private PubSub.EventSize messageSize;
 
 	@Nullable
 	private String getPartitionnerClassName(String paritionerSetting) {
@@ -86,7 +88,7 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 
 	public SimpleKafkaProducer(ServiceConfiguration configuration) {
 
-		super(ServiceType.PRODUCER, configuration);
+		super(Service.ServiceType.PRODUCER, configuration);
 
 		messagesPerBatch = Integer.parseInt(getServiceProperties().getProperty(ConfigurationProperties.CONF_BATCH_SIZE, "1"));
 		waitAfterBatchMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_BATCH, "5000"));
@@ -96,7 +98,7 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 		topicsCreatePartitions = Integer.parseInt(getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_CREATE_PARTITIONS, "1"));
 		topicsCreateReplication = Short.parseShort(getServiceProperties().getProperty(ConfigurationProperties.CONF_TOPIC_CREATE_REPLICAS, "1"));
 		partitionerClassName = getPartitionnerClassName(getServiceProperties().getProperty(ConfigurationProperties.CONF_PRODUCER_REPLICATION, "UNIQUE"));
-
+		messageSize = PubSub.EventSize.valueOf(getServiceProperties().getProperty(ConfigurationProperties.CONF_MESSAGE_SIZE, "M").toUpperCase());
 		adminClient = AdminClient.create(getKafkaProperties());
 		addSpecificKafkaProp(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		addSpecificKafkaProp(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -105,6 +107,8 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 			log.info("Using partitioner class " + partitionerClassName);
 		}
 
+		
+		
 		producer = new KafkaProducer<String, String>(getKafkaProperties());
 	}
 
@@ -157,10 +161,10 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 
 	@Override
 	@SneakyThrows
-	public long sendMessages(List<PubSubMessage> messages) {
+	public long sendEvents(List<PubSub.Event> messages) {
 		long resultingOffset = -1;
 		try {
-			for (PubSubMessage msg : messages) {
+			for (PubSub.Event msg : messages) {
 				final RecordMetadata rm = producer.send(
 						new ProducerRecord<String, String>(topicName, msg.getKey().toString(), msg.getValueAsJson()))
 						.get();
@@ -171,5 +175,10 @@ public class SimpleKafkaProducer extends AbstractBaseProducer  {
 			producer.flush();
 		}
 		return resultingOffset;
+	}
+
+	@Override
+	public PubSub.EventSize getEventSize() {
+		return messageSize;
 	}
 }

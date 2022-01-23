@@ -2,12 +2,12 @@ package org.zlatko.testing.spring.azsptest.services.base.metadata;
 
 import java.util.Optional;
 
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataTopic;
+import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 
 import lombok.Getter;
 
 @Getter
-public class MetadataTopicDesc implements MetadataTopic {
+public class MetadataTopicDesc implements Metadata.Topic {
 	
 	private String name;
 	private Optional<String> id = Optional.empty();

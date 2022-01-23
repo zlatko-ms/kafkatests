@@ -4,11 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataConsumerGroup;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataNode;
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataTopic;
+import org.zlatko.testing.spring.azsptest.services.api.Metadata;
+import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
 import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataTopicDesc;
@@ -24,7 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher implements MetadataFetcher {
+public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher implements Metadata.FetcherService {
 
 	private static class ConfigurationProperties {
 		static final String CONF_CLIENT_ID = "auth.client.id";
@@ -65,7 +62,7 @@ public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher impleme
 	}
 
 	public EventHubMetadataFetcher(ServiceConfiguration appConfig) {
-		super(ServiceType.METADATA_AZURE, appConfig);
+		super(Service.ServiceType.METADATA_AZURE, appConfig);
 
 		ressourceGroupName = getMandatoryProperty(ConfigurationProperties.CONF_RGNAME);
 		String subscriptionId = getMandatoryProperty(ConfigurationProperties.CONF_SUBSCRIPTION_ID);
@@ -85,14 +82,14 @@ public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher impleme
 	}
 
 	@Override
-	public Optional<List<MetadataNode>> getNodesDescriptionDescLines() {
+	public Optional<List<Metadata.Node>> getNodesDescriptionDescLines() {
 		// there are no nodes on a manages solution such as Azure Event Hubs
 		return Optional.empty();
 	}
 
 	@Override
-	public Optional<List<MetadataTopic>> getTopicsDescriptionDescLines() {
-		List<MetadataTopic> topics = Lists.newArrayList();
+	public Optional<List<Metadata.Topic>> getTopicsDescriptionDescLines() {
+		List<Metadata.Topic> topics = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).forEach(eh -> {
 			topics.add(MetadataTopicDesc.builder(eh.name()).withPartitions(eh.partitionIds().size()));
 		});
@@ -100,8 +97,8 @@ public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher impleme
 	}
 
 	@Override
-	public Optional<List<MetadataConsumerGroup>> getConsumerGroupDescLines() {
-		List<MetadataConsumerGroup> cgs = Lists.newArrayList();
+	public Optional<List<Metadata.ConsumerGroup>> getConsumerGroupDescLines() {
+		List<Metadata.ConsumerGroup> cgs = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).stream().forEach(eh -> {
 			eh.listConsumerGroups().stream().forEach(cg -> {
 				cgs.add(MetadataConsumerGroupDesc.builder(cg.name()).forTopic(eh.name()).withId(cg.id()));

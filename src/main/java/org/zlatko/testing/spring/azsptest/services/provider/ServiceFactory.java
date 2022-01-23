@@ -1,7 +1,8 @@
-package org.zlatko.testing.spring.azsptest.services.api;
+package org.zlatko.testing.spring.azsptest.services.provider;
 
 import java.util.List;
 
+import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.services.provider.azure.EventHubMetadataFetcher;
 import org.zlatko.testing.spring.azsptest.services.provider.kafka.SimpleKafkaConsumer;
 import org.zlatko.testing.spring.azsptest.services.provider.kafka.SimpleKafkaMetadataFetcher;
@@ -13,7 +14,7 @@ import com.google.common.collect.Lists;
 public final class ServiceFactory {
 
 	/** builds service to test */
-	public static final ConfigurableService buildTestService(ServiceType type, ServiceConfiguration appConf) {
+	public static final Service.ConfigurableService buildTestService(Service.ServiceType type, ServiceConfiguration appConf) {
 		switch (type) {
 		case PRODUCER:
 			return new SimpleKafkaProducer(appConf);
@@ -30,7 +31,7 @@ public final class ServiceFactory {
 	/** list the available services with custom separator*/
 	public static String getValidServiceTypesAsString(String separator) {
 		List<String> validServices = Lists.newArrayList();
-		for (ServiceType type : ServiceType.values()) {
+		for (Service.ServiceType type : Service.ServiceType.values()) {
 			validServices.add(type.name().toLowerCase());
 		}
 		return String.join(separator, validServices);

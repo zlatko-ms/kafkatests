@@ -9,9 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.zlatko.testing.spring.azsptest.services.api.ConfigurableService;
-import org.zlatko.testing.spring.azsptest.services.api.ServiceFactory;
-import org.zlatko.testing.spring.azsptest.services.api.ServiceType;
+import org.zlatko.testing.spring.azsptest.services.api.Service;
+import org.zlatko.testing.spring.azsptest.services.provider.ServiceFactory;
 import org.zlatko.testing.spring.azsptest.util.Configuration;
 import org.zlatko.testing.spring.azsptest.util.Configuration.CommandLineParameters;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
@@ -40,12 +39,12 @@ public class Application {
 	}
 
 	// return the test service to run
-	private ServiceType getServiceModeParameter(CommandLineParameters params) {
+	private Service.ServiceType getServiceModeParameter(CommandLineParameters params) {
 		Optional<String> service = params.getParam(PARAM_SERVICE);
-		ServiceType mode = null;
+		Service.ServiceType mode = null;
 		if (!service.isEmpty()) {
 			try {
-				mode = ServiceType.valueOf(service.get().toUpperCase());
+				mode = Service.ServiceType.valueOf(service.get().toUpperCase());
 			} catch (IllegalArgumentException e) {
 				log.severe(String.format(LOG_ERROR_INVALID_SERVICE,service.get(),ServiceFactory.getValidServiceTypesAsString()));
 			}
@@ -56,8 +55,8 @@ public class Application {
 	// return the application configuration
 	private ServiceConfiguration getConfigurationParameter(CommandLineParameters params) {
 		List<String> envVarPrefixes = Lists.newArrayList();
-		ServiceType[] services = ServiceType.values();
-		for (ServiceType t : services ) {
+		Service.ServiceType[] services = Service.ServiceType.values();
+		for (Service.ServiceType t : services ) {
 			envVarPrefixes.add(t.name().toUpperCase());
 		}
 		
@@ -83,7 +82,7 @@ public class Application {
 		return args -> {
 
 			CommandLineParameters appParameters = parseParameters(args);
-			ServiceType testServiceType = getServiceModeParameter(appParameters);
+			Service.ServiceType testServiceType = getServiceModeParameter(appParameters);
 			ServiceConfiguration appConfiguration = getConfigurationParameter(appParameters);
 
 			if (testServiceType == null) {
@@ -98,7 +97,7 @@ public class Application {
 			
 			log.info(String.format(LOG_BEFORE_SERVICE_START, testServiceType.name().toLowerCase(),appConfiguration.getLoadedConfigurationFilePath()));
 
-			ConfigurableService kafkaService = ServiceFactory.buildTestService(testServiceType, appConfiguration);
+			Service.ConfigurableService kafkaService = ServiceFactory.buildTestService(testServiceType, appConfiguration);
 
 			if (kafkaService != null)
 				kafkaService.run();

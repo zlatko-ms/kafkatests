@@ -2,12 +2,12 @@ package org.zlatko.testing.spring.azsptest.services.base.metadata;
 
 import java.util.Optional;
 
-import org.zlatko.testing.spring.azsptest.services.api.metadata.MetadataConsumerGroup;
+import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 
 import lombok.Getter;
 
 @Getter
-public class MetadataConsumerGroupDesc implements MetadataConsumerGroup {
+public class MetadataConsumerGroupDesc implements Metadata.ConsumerGroup {
 	
 	private String name;
 	private Optional<Boolean> internal=Optional.empty();
