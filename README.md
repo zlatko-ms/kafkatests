@@ -116,7 +116,6 @@ Note that the jar file will be created under the target dir once you perform the
 java -jar azsptest-<version>-SNAPSHOT.jar producer src/run/configuration.properties.azure
 ```
 
-
 ## Run from Docker
 
 Unless you are running against a local kafka cluster witout any authentication, please ensure that the following evironnement variables are passed to the docker executor : 
@@ -140,6 +139,10 @@ METADATA_AZURE_AUTH_TENANT_ID
 METADATA_AZURE_AUTH_SUBSCRIPTION_ID
 
 METADATA_AZURE_RG_NAME
+
+## Measure the performances
+
+You can use the **parselog.sh** script located at root level to parse an application log and trasnform it into a CSV file usable with any spreadheet.
 
 
 
