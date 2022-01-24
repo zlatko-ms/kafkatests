@@ -15,15 +15,32 @@
             </Pattern> -->
         </layout>
     </appender>
+    
+      <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>kafkatests.log</file>
+        <encoder>
+            <pattern>%d [%thread] %-5level %t : - %msg%n</pattern>
+        </encoder>
+         
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>kafkatests-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>1MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10MB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
 
     <!-- LOG everything at WARN level -->
     <root level="warn">
         <appender-ref ref="Console" />
+        <appender-ref ref="RollingFile" />
     </root>
 
     <!-- LOG "org.testing*" at INFO level -->
-    <logger name="org.testing" level="info" additivity="false">
+    <logger name="org.testing" level="info">
         <appender-ref ref="Console" />
+        <appender-ref ref="RollingFile" />
     </logger>
 
 </configuration>
