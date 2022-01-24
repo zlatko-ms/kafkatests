@@ -110,7 +110,12 @@ Where :
 - **serviceName** is one of the following : **consumer** , **producer**, **metadata_kafka** or **metadata_azure**
 - **configurationFle** is a path to a valid configuration properties file
 
-The jar file will be created under the target dir once you perform the build process.
+Note that the jar file will be created under the target dir once you perform the build process, so an example of usage from the source dir would be : 
+
+```console
+java -jar azsptest-<version>-SNAPSHOT.jar producer src/run/configuration.properties.azure
+```
+
 
 ## Run from Docker
 
