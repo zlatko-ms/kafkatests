@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import lombok.SneakyThrows;
 
-public abstract class AbstractBasePubSubMessage implements PubSub.Event { 
+public abstract class AbstractPubSubEvent implements PubSub.Event { 
 	
 	protected static ObjectWriter jsonObjectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 

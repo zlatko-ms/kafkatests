@@ -1,5 +1,6 @@
 package org.zlatko.testing.spring.azsptest.services.base;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,20 +11,24 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 
 @Getter
-public class SizedPubSubMessage extends AbstractBasePubSubMessage implements PubSub.Event {
+public class SizedPubSubEvent extends AbstractPubSubEvent implements PubSub.Event {
 
 	private String key;
 	private Map<String,String> value = Maps.newHashMap();
 	
-	public SizedPubSubMessage(int index, String keyPrefix,PubSub.EventSize size) {
+	public SizedPubSubEvent(int index, String keyPrefix,PubSub.EventSize size) {
 		this(keyPrefix+index,size);
 	}
 	
-	public SizedPubSubMessage(String key,PubSub.EventSize size) {
+	public SizedPubSubEvent(String key,PubSub.EventSize size) {
 		this.key=key;
-		int kbs = size.getSize();
+		int totalBytes = size.getSize() *1024;
 		value.put("key", key);
-		for (int i=0;i<kbs;i++) {
+		
+		int remainingBytes = totalBytes-key.getBytes(StandardCharsets.UTF_8).length;
+		int iterations = remainingBytes / 52; 
+		
+		for (int i=0;i<iterations;i++) {
 			value.put("attr-"+i, UUID.randomUUID().toString());
 		}
 	}

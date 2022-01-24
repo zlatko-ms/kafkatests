@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.AbstractBaseService;
+import org.zlatko.testing.spring.azsptest.services.base.AbstractConfigurableService;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.collect.Lists;
@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import lombok.extern.java.Log;
 
 @Log
-public abstract class AbstractBaseMetadataFetcher extends AbstractBaseService implements Metadata.FetcherService {
+public abstract class AbstractMetadataFetcherService extends AbstractConfigurableService implements Metadata.FetcherService {
 
 	protected final static String OP_LIST_NODES = "listing nodes";
 	protected final static String OP_LIST_CGS = "listing consumer groups";
@@ -23,7 +23,7 @@ public abstract class AbstractBaseMetadataFetcher extends AbstractBaseService im
 	protected final static String ITEM_TOPICS = "### [ Topics          ] #######################################";
 	protected final static String ITEM_CGS    = "### [ Consumer Groups ] ##########################################";
 	
-	protected AbstractBaseMetadataFetcher(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
+	protected AbstractMetadataFetcherService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
 	}
 	

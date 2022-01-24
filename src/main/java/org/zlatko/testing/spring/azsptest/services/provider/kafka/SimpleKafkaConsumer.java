@@ -1,5 +1,7 @@
 package org.zlatko.testing.spring.azsptest.services.provider.kafka;
 
+import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +13,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.SimplePubSubMessage;
-import org.zlatko.testing.spring.azsptest.services.base.pubsub.AbstractBaseConsumer;
+import org.zlatko.testing.spring.azsptest.services.base.SimplePubSubEvent;
+import org.zlatko.testing.spring.azsptest.services.base.pubsub.AbstractConsumerService;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.base.Strings;
@@ -22,7 +24,7 @@ import lombok.extern.java.Log;
 
 /** simple Kafka consumer test service */
 @Log
-public class SimpleKafkaConsumer extends AbstractBaseConsumer {
+public class SimpleKafkaConsumer extends AbstractConsumerService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_POLL_DURATION_MS = "poll.interval.ms";
@@ -94,7 +96,7 @@ public class SimpleKafkaConsumer extends AbstractBaseConsumer {
 		@SuppressWarnings("deprecation")
 		final ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(getPollTimeMs());
 		consumerRecords.forEach( cr -> {
-			res.add(new SimplePubSubMessage(cr.key(), cr.value()));
+			res.add(new SimplePubSubEvent(cr.key(), cr.value()));
 		});
 		return res;
 	}

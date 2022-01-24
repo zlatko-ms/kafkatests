@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.AbstractBaseService;
+import org.zlatko.testing.spring.azsptest.services.base.AbstractConfigurableService;
 import org.zlatko.testing.spring.azsptest.services.base.PubSubPerformanceTracker;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
@@ -12,11 +12,11 @@ import lombok.extern.java.Log;
 
 
 @Log
-public abstract class AbstractBaseConsumer extends AbstractBaseService implements PubSub.ConsumerService {
+public abstract class AbstractConsumerService extends AbstractConfigurableService implements PubSub.ConsumerService {
 
 	private PubSubPerformanceTracker perfTracker = new PubSubPerformanceTracker();
 	
-	protected AbstractBaseConsumer(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
+	protected AbstractConsumerService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
 	}
 	
@@ -34,13 +34,15 @@ public abstract class AbstractBaseConsumer extends AbstractBaseService implement
 			List<PubSub.Event> messages = pollEvents();
 			log.info(String.format("polled %d messages", messages.size()));
 	
+
+			long bytesRecv = 0;
+			for (PubSub.Event e : messages) {
+				bytesRecv+=PubSubPerformanceTracker.getBytesInString(e.getValueAsJson());
+			}
+			
 			perfTracker.increaseMessageCount(messages.size());
 			perfTracker.increaseProcessingTimeMillisecs(pollTime);
-			
-			messages.forEach( m -> {
-				perfTracker.increaseProcessingPayloadSizeBytes(PubSubPerformanceTracker.getBytesInString(m.getValueAsJson()));
-			});
-	
+			perfTracker.increaseProcessingPayloadSizeBytes(bytesRecv);
 			
 			if ( dumpEventDetails()) {
 				messages.forEach( m -> {
@@ -48,12 +50,25 @@ public abstract class AbstractBaseConsumer extends AbstractBaseService implement
 				});
 			}
 			
-			log.info(String.format("stats messages=%d throughput=%s kb/s speed=%s evts/s",
+			double durationSeconds = pollTime / 1000;
+			double throughputKbs = (bytesRecv/1024)/durationSeconds;
+			double throughputEps = messages.size()/durationSeconds;
+			
+			
+			log.info(String.format("instant stats messages=%d throughput=%s kb/s speed=%s evts/s",
+					messages.size(),
+					PubSubPerformanceTracker.formatDecimal(throughputKbs),
+					PubSubPerformanceTracker.formatDecimal(throughputEps)));
+			
+			log.info(String.format("aggregated stats messages=%d throughput=%s kb/s speed=%s evts/s",
 					perfTracker.getTotalMessagesCount(),
 					perfTracker.getReadbleThroughputKBs(),
 					perfTracker.getReadableThroughputEps()));
 			
-			log.info(String.format(";CSVSTATS;%s;%s;%s",perfTracker.getReadbleThroughputKBs(),perfTracker.getReadableThroughputEps(),perfTracker.getTotalMessagesCount()));
+			log.info(String.format(";CSVSTATS;%s;%s;%s",
+					perfTracker.getReadbleThroughputKBs(),
+					perfTracker.getReadableThroughputEps(),
+					perfTracker.getTotalMessagesCount()));
 			
 			if (getIdleAfterPollMs().isPresent()) {
 				log.info(String.format("sleeping %d ms",getIdleAfterPollMs().get()));

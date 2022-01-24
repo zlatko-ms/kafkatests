@@ -13,10 +13,10 @@ import org.apache.kafka.clients.admin.TopicListing;
 import org.apache.kafka.common.TopicPartitionInfo;
 import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataNodeDesc;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataTopicDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractMetadataFetcherService;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.ConsumerGroupDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.NodeDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.TopicDesc;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.base.Splitter;
@@ -28,7 +28,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher implements Metadata.FetcherService {
+public class SimpleKafkaMetadataFetcher extends AbstractMetadataFetcherService implements Metadata.FetcherService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_DESCRIBE_INTERNAL_TOPICS = "describe.internal.topics";
@@ -64,7 +64,7 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 			DescribeClusterResult clusterDesc = adminClient.describeCluster();
 			clusterDesc.nodes().get().forEach(node -> {
 				
-				nodes.add(MetadataNodeDesc.builder(node.host())
+				nodes.add(NodeDesc.builder(node.host())
 					.withId(node.idString())
 					.withPort(node.port())
 					.withRack(node.hasRack() ? node.rack() : null));
@@ -96,7 +96,7 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 					replicaCount+=tpi.replicas().size();
 				}
 					
-				topicsDesc.add(MetadataTopicDesc.builder(topic.name())
+				topicsDesc.add(TopicDesc.builder(topic.name())
 					.withPartitions(topic.partitions().size())
 					.withReplication(replicaCount)
 					.withId(topic.topicId().toString())
@@ -117,7 +117,7 @@ public class SimpleKafkaMetadataFetcher extends AbstractBaseMetadataFetcher impl
 		try {
 			Collection<ConsumerGroupListing> consumerGroupList = adminClient.listConsumerGroups().all().get();
 			consumerGroupList.forEach(cg -> {
-				cgDescs.add(MetadataConsumerGroupDesc.builder(cg.groupId()).asSimple(cg.isSimpleConsumerGroup()));
+				cgDescs.add(ConsumerGroupDesc.builder(cg.groupId()).asSimple(cg.isSimpleConsumerGroup()));
 			});
 		} catch (Throwable e) {
 			log.info(String.format("Error while fetching consumer groups description " + e.getMessage()));

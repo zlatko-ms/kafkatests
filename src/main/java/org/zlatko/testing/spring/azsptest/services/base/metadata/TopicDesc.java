@@ -7,7 +7,7 @@ import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import lombok.Getter;
 
 @Getter
-public class MetadataTopicDesc implements Metadata.Topic {
+public class TopicDesc implements Metadata.Topic {
 	
 	private String name;
 	private Optional<String> id = Optional.empty();
@@ -15,7 +15,7 @@ public class MetadataTopicDesc implements Metadata.Topic {
 	private Optional<Boolean> isInternal = Optional.empty();
 	private int partitionCount=1;
 
-	public MetadataTopicDesc(String name) {
+	public TopicDesc(String name) {
 		this.name=name;
 	}
 	
@@ -43,26 +43,26 @@ public class MetadataTopicDesc implements Metadata.Topic {
 				getReplicaCount().isEmpty() ? "n/a" : getReplicaCount().get());
 	}
 	
-	public static MetadataTopicDesc builder(String name) {
-		return new MetadataTopicDesc(name);
+	public static TopicDesc builder(String name) {
+		return new TopicDesc(name);
 	}
 	
-	public MetadataTopicDesc withPartitions(int parts) {
+	public TopicDesc withPartitions(int parts) {
 		setPartitions(parts);
 		return this;
 	}
 	
-	public MetadataTopicDesc withReplication(int repl) {
+	public TopicDesc withReplication(int repl) {
 		setReplicaCont(repl);
 		return this;
 	}
 	
-	public MetadataTopicDesc withId(String id) {
+	public TopicDesc withId(String id) {
 		setId(id);
 		return this;
 	}
 	
-	public MetadataTopicDesc asInternal(boolean internal) {
+	public TopicDesc asInternal(boolean internal) {
 		setInternal(internal);
 		return this;
 	}

@@ -7,14 +7,14 @@ import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import lombok.Getter;
 
 @Getter
-public class MetadataNodeDesc implements Metadata.Node {
+public class NodeDesc implements Metadata.Node {
 	
 	private String name;
 	private Optional<String> rack=Optional.empty();
 	private Optional<Integer> port=Optional.empty();
 	private Optional<String> id=Optional.empty();
 	
-	public MetadataNodeDesc(String name) {
+	public NodeDesc(String name) {
 		this.name = name;
 	}
 	
@@ -35,22 +35,22 @@ public class MetadataNodeDesc implements Metadata.Node {
 		return String.format("[>] node name=%s rack=%s", getName() , getRack().isEmpty() ? "n/a" : getRack().get());
 	}
 	
-	public static MetadataNodeDesc builder(String name) {
-		return new MetadataNodeDesc(name);
+	public static NodeDesc builder(String name) {
+		return new NodeDesc(name);
 	}
 	
-	public MetadataNodeDesc withRack(String rack) {
+	public NodeDesc withRack(String rack) {
 		if (rack!=null)
 			setRack(rack);
 		return this;
 	}
 	
-	public MetadataNodeDesc withPort(Integer port) {
+	public NodeDesc withPort(Integer port) {
 		setPort(port);
 		return this;
 	}
 	
-	public MetadataNodeDesc withId(String id) {
+	public NodeDesc withId(String id) {
 		setId(id);
 		return this;
 	}

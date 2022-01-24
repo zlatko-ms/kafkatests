@@ -19,7 +19,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.pubsub.AbstractBaseProducer;
+import org.zlatko.testing.spring.azsptest.services.base.pubsub.AbstractProducerService;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.google.common.base.Joiner;
@@ -29,7 +29,7 @@ import lombok.extern.java.Log;
 
 /** simple kafka producer test service */
 @Log
-public class SimpleKafkaProducer extends AbstractBaseProducer  {
+public class SimpleKafkaProducer extends AbstractProducerService  {
 
 	private final class ConfigurationProperties {
 		static final String CONF_BATCH_SIZE = "messages.per.batch";

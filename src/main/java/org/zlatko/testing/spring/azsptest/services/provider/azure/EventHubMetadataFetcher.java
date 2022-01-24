@@ -6,9 +6,9 @@ import java.util.Optional;
 
 import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractBaseMetadataFetcher;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataConsumerGroupDesc;
-import org.zlatko.testing.spring.azsptest.services.base.metadata.MetadataTopicDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.AbstractMetadataFetcherService;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.ConsumerGroupDesc;
+import org.zlatko.testing.spring.azsptest.services.base.metadata.TopicDesc;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import com.azure.core.management.AzureEnvironment;
@@ -21,7 +21,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher implements Metadata.FetcherService {
+public class EventHubMetadataFetcher extends AbstractMetadataFetcherService implements Metadata.FetcherService {
 
 	private static class ConfigurationProperties {
 		static final String CONF_CLIENT_ID = "auth.client.id";
@@ -91,7 +91,7 @@ public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher impleme
 	public Optional<List<Metadata.Topic>> getTopicsDescriptionDescLines() {
 		List<Metadata.Topic> topics = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).forEach(eh -> {
-			topics.add(MetadataTopicDesc.builder(eh.name()).withPartitions(eh.partitionIds().size()));
+			topics.add(TopicDesc.builder(eh.name()).withPartitions(eh.partitionIds().size()));
 		});
 		return Optional.of(topics);
 	}
@@ -101,7 +101,7 @@ public class EventHubMetadataFetcher extends AbstractBaseMetadataFetcher impleme
 		List<Metadata.ConsumerGroup> cgs = Lists.newArrayList();
 		eventHubs.listByNamespace(ressourceGroupName, eventHubNamespace).stream().forEach(eh -> {
 			eh.listConsumerGroups().stream().forEach(cg -> {
-				cgs.add(MetadataConsumerGroupDesc.builder(cg.name()).forTopic(eh.name()).withId(cg.id()));
+				cgs.add(ConsumerGroupDesc.builder(cg.name()).forTopic(eh.name()).withId(cg.id()));
 			});
 		});
 		return Optional.of(cgs);

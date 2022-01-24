@@ -6,19 +6,19 @@ import java.util.Properties;
 
 import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
-import org.zlatko.testing.spring.azsptest.services.base.AbstractBaseService;
+import org.zlatko.testing.spring.azsptest.services.base.AbstractConfigurableService;
 import org.zlatko.testing.spring.azsptest.services.base.PubSubPerformanceTracker;
-import org.zlatko.testing.spring.azsptest.services.base.SizedPubSubMessage;
+import org.zlatko.testing.spring.azsptest.services.base.SizedPubSubEvent;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 import lombok.extern.java.Log;
 
 @Log
-public abstract class AbstractBaseProducer extends AbstractBaseService implements PubSub.ProducerService {
+public abstract class AbstractProducerService extends AbstractConfigurableService implements PubSub.ProducerService {
 	
 	private PubSubPerformanceTracker perfTracker = new PubSubPerformanceTracker();
 
-	protected AbstractBaseProducer(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
+	protected AbstractProducerService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
 	}
 
@@ -28,7 +28,7 @@ public abstract class AbstractBaseProducer extends AbstractBaseService implement
 			int currentMessagesTotal = perfTracker.getTotalMessagesCount() ;
 			Properties p = new Properties();
 			p.put("message", "hello-" + (currentMessagesTotal  + i));
-			PubSub.Event msg = new SizedPubSubMessage(currentMessagesTotal + i,"message-",getEventSize());
+			PubSub.Event msg = new SizedPubSubEvent(currentMessagesTotal + i,"message-",getEventSize());
 			batch.add(msg);
 		}
 		return batch;
@@ -50,18 +50,31 @@ public abstract class AbstractBaseProducer extends AbstractBaseService implement
 					getEventSize().getSize()));
 			
 			List<PubSub.Event> messages = buildBatch();
-			
+			long batchSizeInBytes = 0;
+			for (PubSub.Event e : messages ) {
+				batchSizeInBytes+=PubSubPerformanceTracker.getBytesInString(e.getValueAsJson());
+			}
+				
 			log.info("sending batch");
 			long startTime = System.currentTimeMillis();
 			sendEvents(messages);
 			long duration = System.currentTimeMillis() - startTime; 
-			log.info( String.format("batch sent in %d ms",duration));
-			messages.forEach( m -> {
-				perfTracker.increaseProcessingPayloadSizeBytes(PubSubPerformanceTracker.getBytesInString(m.getValueAsJson()));
-			});
+			if (duration<1)
+				duration=1;
+			
+			log.info( String.format("batch sent in %d ms total size=%s bytes",duration,batchSizeInBytes));
+			double currentStepThroughputEpS = getMessageBatchSize()/(duration/1000);
+			double currentStepThroughputKbs = (batchSizeInBytes/1024)/(duration/1000);
+			perfTracker.increaseProcessingPayloadSizeBytes(batchSizeInBytes);
 			perfTracker.increaseMessageCount(messages.size());
 			perfTracker.increaseProcessingTimeMillisecs(duration);
-			log.info(String.format("current stats thoughput=%s kb/s speed=%s evts/s total_sent=%s limit=%s",
+		
+			
+			log.info(String.format("last stats thoughput=%s kb/s speed=%s evts/s",
+					PubSubPerformanceTracker.formatDecimal(currentStepThroughputKbs),
+					PubSubPerformanceTracker.formatDecimal(currentStepThroughputEpS)));
+			
+			log.info(String.format("aggregated stats thoughput=%s kb/s speed=%s evts/s total_sent=%s limit=%s",
 					perfTracker.getReadbleThroughputKBs(),
 					perfTracker.getReadableThroughputEps(),
 					perfTracker.getTotalMessagesCount(),

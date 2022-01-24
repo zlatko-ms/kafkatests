@@ -7,7 +7,7 @@ import org.zlatko.testing.spring.azsptest.services.api.Metadata;
 import lombok.Getter;
 
 @Getter
-public class MetadataConsumerGroupDesc implements Metadata.ConsumerGroup {
+public class ConsumerGroupDesc implements Metadata.ConsumerGroup {
 	
 	private String name;
 	private Optional<Boolean> internal=Optional.empty();
@@ -15,7 +15,7 @@ public class MetadataConsumerGroupDesc implements Metadata.ConsumerGroup {
 	private Optional<String> topic = Optional.empty();
 	private Optional<String> id = Optional.empty();
 	
-	public MetadataConsumerGroupDesc(String name) {
+	public ConsumerGroupDesc(String name) {
 		this.name=name;
 	}
 	
@@ -56,27 +56,27 @@ public class MetadataConsumerGroupDesc implements Metadata.ConsumerGroup {
 				);
 	}
 	
-	public static MetadataConsumerGroupDesc builder(String name) {
-		return new MetadataConsumerGroupDesc(name);
+	public static ConsumerGroupDesc builder(String name) {
+		return new ConsumerGroupDesc(name);
 	}
 	
-	public MetadataConsumerGroupDesc asInternal(boolean internal) {
+	public ConsumerGroupDesc asInternal(boolean internal) {
 		setInternal(internal);
 		return this;
 	}
 	
-	public MetadataConsumerGroupDesc asSimple(boolean simple) {
+	public ConsumerGroupDesc asSimple(boolean simple) {
 		setSimple(simple);
 		return this;
 	}
 	
-	public MetadataConsumerGroupDesc forTopic(String topicName) {
+	public ConsumerGroupDesc forTopic(String topicName) {
 		if (topicName!=null)
 			setTopic(topicName);
 		return this;
 	}
 	
-	public MetadataConsumerGroupDesc withId(String id) {
+	public ConsumerGroupDesc withId(String id) {
 		if (id!=null) {
 			setId(id);
 		}
