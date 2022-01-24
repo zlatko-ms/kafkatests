@@ -3,11 +3,13 @@ package org.zlatko.testing.spring.azsptest.services.base;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 
+import org.zlatko.testing.spring.azsptest.services.api.PubSub;
+
 import lombok.Getter;
 
 @Getter
 /** utility class to track event performances */
-public class PubSubPerformanceTracker {
+public class PubSubPerformanceTracker implements PubSub.PerformanceTracker {
 	
 	private int totalMessagesCount=0;
 	private long totalProcessingTimeMs=0;
@@ -51,12 +53,12 @@ public class PubSubPerformanceTracker {
 		return df.format(minutes);
 	}
 	
-	public static final int getBytesInString(String payload) {
+	public final int getBytesInString(String payload) {
 		byte[] b = payload.getBytes(StandardCharsets.UTF_8);
 		return b.length;
 	}
 	
-	public static final String formatDecimal(double d) {
+	public final String formatDecimal(double d) {
 		return df.format(d);
 	}
 

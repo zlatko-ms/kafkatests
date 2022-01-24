@@ -31,7 +31,8 @@ class PubSubPerformanceTrackerTest {
 	private void assertMessageSize(EventSize size) {
 		SizedPubSubEvent event = new SizedPubSubEvent("test",size);
 		long min = size.getSize() * 1024;
-		long eventSizeBytes = PubSubPerformanceTracker.getBytesInString(event.getValueAsJson());
+		PubSubPerformanceTracker tracker = new PubSubPerformanceTracker();
+		long eventSizeBytes = tracker.getBytesInString(event.getValueAsJson());
 		assertTrue ( (eventSizeBytes>=min) , "event of size "+size.name()+" is at least "+min+" bytes long, current len ="+eventSizeBytes);
 		
 	}
