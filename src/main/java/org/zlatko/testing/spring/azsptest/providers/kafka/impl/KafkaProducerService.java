@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import lombok.extern.java.Log;
 
 /** simple Kafka producer test service */
 @Log
-public class SimpleKafkaProducer extends AbstractProducerService  {
+public class KafkaProducerService extends AbstractProducerService  {
 
 	private final class ConfigurationProperties {
 		static final String CONF_PRODUCER_REPLICATION = "topic.partitioner";
@@ -71,14 +71,14 @@ public class SimpleKafkaProducer extends AbstractProducerService  {
 		}
 	}
 
-	public SimpleKafkaProducer(ServiceConfiguration configuration) {
+	public KafkaProducerService(ServiceConfiguration configuration) {
 
 		super(Service.ServiceType.PRODUCER, configuration);
 		
 		final String partitionnerType = getServiceProperties().getProperty(ConfigurationProperties.CONF_PRODUCER_REPLICATION, "UNIQUE");
 		partitionerClassName = getPartitionnerClassName(partitionnerType);
 		
-		Properties kafkaProperties = configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		Properties kafkaProperties = configuration.getConfiguration(ConfConstants.KAFKA_SHARED_SERVICE);
 		
 		adminClient = AdminClient.create(kafkaProperties);
 		

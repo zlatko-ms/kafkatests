@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +29,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SimpleKafkaMetadataFetcher extends AbstractMetadataFetcherService implements Metadata.FetcherService {
+public class KafkaMetadataService extends AbstractMetadataFetcherService implements Metadata.FetcherService {
 
 	private final class ConfigurationProperties {
 		static final String CONF_DESCRIBE_INTERNAL_TOPICS = "describe.internal.topics";
@@ -51,11 +51,11 @@ public class SimpleKafkaMetadataFetcher extends AbstractMetadataFetcherService i
 		return ret;
 	}
 	
-	public SimpleKafkaMetadataFetcher(ServiceConfiguration appConfig) {
-		super(Service.ServiceType.METADATA_KAFKA,appConfig);
+	public KafkaMetadataService(ServiceConfiguration appConfig) {
+		super(Service.ServiceType.METADATA,appConfig);
 		describeTopicsPrivate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_INTERNAL_TOPICS, "false"));
 		describeTopicList.addAll(getTopicsToDescribe());
-		Properties kafkaProperties = appConfig.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		Properties kafkaProperties = appConfig.getConfiguration(ConfConstants.KAFKA_SHARED_SERVICE);
 		adminClient = AdminClient.create(kafkaProperties);
 	}
 	

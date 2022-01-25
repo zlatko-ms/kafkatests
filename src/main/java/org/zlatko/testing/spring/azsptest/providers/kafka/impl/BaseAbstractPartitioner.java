@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import java.math.BigInteger;
 import java.util.Map;

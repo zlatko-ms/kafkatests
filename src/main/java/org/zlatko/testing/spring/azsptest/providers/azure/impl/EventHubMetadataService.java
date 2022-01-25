@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.azure;
+package org.zlatko.testing.spring.azsptest.providers.azure.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,28 +18,27 @@ import com.azure.resourcemanager.eventhubs.EventHubsManager;
 import com.azure.resourcemanager.eventhubs.models.EventHubs;
 import com.google.common.collect.Lists;
 
-public class EventHubMetadataFetcher extends AbstractMetadataFetcherService implements Metadata.FetcherService {
+public final class EventHubMetadataService extends AbstractMetadataFetcherService implements Metadata.FetcherService {
 
 	private String ressourceGroupName;
 	private String eventHubNamespace;
 	private EventHubs eventHubs;
 
+	public EventHubMetadataService(ServiceConfiguration appConfig) {
+		super(Service.ServiceType.METADATA, appConfig);
 
-	public EventHubMetadataFetcher(ServiceConfiguration appConfig) {
-		super(Service.ServiceType.METADATA_AZURE, appConfig);
-
-		ressourceGroupName = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_RGNAME);
-		String subscriptionId = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SPN_SUBSCRIPTION_ID);
-		String tenantId = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SPN_TENANT_ID);
-		String clientId = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SPN_CLIENT_ID);
-		String secret = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SPN_CLIENT_SECRET);
+		ressourceGroupName = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_RGNAME);
+		String subscriptionId = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SPN_SUBSCRIPTION_ID);
+		String tenantId = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SPN_TENANT_ID);
+		String clientId = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SPN_CLIENT_ID);
+		String secret = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SPN_CLIENT_SECRET);
 		ClientSecretCredential clientSecretCredential = new ClientSecretCredentialBuilder()
 				.clientId(clientId)
 				.clientSecret(secret)
 				.tenantId(tenantId)
 				.build();
 		
-		eventHubNamespace =getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_NAMESPACE);
+		eventHubNamespace =getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_NAMESPACE);
 		AzureProfile azureProfile = new AzureProfile(tenantId, subscriptionId, AzureEnvironment.AZURE);
 		eventHubs = EventHubsManager.authenticate(clientSecretCredential, azureProfile).eventHubs();
 

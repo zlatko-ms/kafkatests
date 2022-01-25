@@ -1,9 +1,9 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
 
-public class EvenOddPartitioner extends BaseAbstractPartitioner implements Partitioner {
+public final class EvenOddPartitioner extends BaseAbstractPartitioner implements Partitioner {
 
 	@Override
 	public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes,

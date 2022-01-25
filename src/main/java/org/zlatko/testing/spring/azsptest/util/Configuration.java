@@ -98,7 +98,7 @@ public class Configuration {
 
 		public ServiceConfigurationImpl(List<String> prefixes) {
 			loadedProperties = new Properties();
-			servicePrefixes.add("kafka");
+//			servicePrefixes.add("kafka");
 			servicePrefixes.addAll(prefixes);
 		}
 

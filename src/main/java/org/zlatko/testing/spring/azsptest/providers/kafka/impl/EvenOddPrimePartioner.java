@@ -1,11 +1,11 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import java.util.Map;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
 
-public class EvenOddPrimePartioner  extends BaseAbstractPartitioner implements Partitioner {
+public final class EvenOddPrimePartioner  extends BaseAbstractPartitioner implements Partitioner {
 
 	@Override
 	public void configure(Map<String, ?> configs) {}

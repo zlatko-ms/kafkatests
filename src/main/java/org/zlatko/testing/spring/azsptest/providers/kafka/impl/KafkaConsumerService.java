@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.kafka;
+package org.zlatko.testing.spring.azsptest.providers.kafka.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,20 +21,20 @@ import lombok.extern.java.Log;
 
 /** simple Kafka consumer test service */
 @Log
-public class SimpleKafkaConsumer extends AbstractConsumerService {
+public class KafkaConsumerService extends AbstractConsumerService {
 
 	private Consumer<String, String> kafkaConsumer;
 	
-	public SimpleKafkaConsumer(ServiceConfiguration configuration) {
+	public KafkaConsumerService(ServiceConfiguration configuration) {
 
 		super(Service.ServiceType.CONSUMER, configuration);
-		Properties kafkaProperties = configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		Properties kafkaProperties = configuration.getConfiguration(ConfConstants.KAFKA_SHARED_SERVICE);
 		if (getConsumerGroup().isPresent())
 			kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroup().get());
 		kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
-		configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		configuration.getConfiguration(ConfConstants.KAFKA_SHARED_SERVICE);
 		kafkaConsumer = new KafkaConsumer<String, String>(kafkaProperties);
 	}
 

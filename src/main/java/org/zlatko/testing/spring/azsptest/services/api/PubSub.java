@@ -7,14 +7,12 @@ public final class PubSub {
 	
 	/** event abstraction */
 	public interface Event {
-		// event key
 		String getKey();
-		// event value
 		Object getValue();
-		// event value in json format
 		String getValueAsJson();
 	}
-	
+
+	/** processing performance tracker */
 	public interface PerformanceTracker {
 		// increases the number of processed messages
 		public void increaseMessageCount(int messages);

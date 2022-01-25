@@ -1,4 +1,4 @@
-package org.zlatko.testing.spring.azsptest.services.provider.azure;
+package org.zlatko.testing.spring.azsptest.providers.azure.impl;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -23,19 +23,19 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class EventHubProducer extends AbstractProducerService  {
+public final class EventHubProducerService extends AbstractProducerService  {
 
 	private EventHubClient sender;
 	private Gson gson = new GsonBuilder().create();
 	private ScheduledExecutorService executorService;
 	
-	public EventHubProducer(ServiceConfiguration configuration) {
-		super(Service.ServiceType.PRODUCER_AZURE,configuration);
+	public EventHubProducerService(ServiceConfiguration configuration) {
+		super(Service.ServiceType.PRODUCER,configuration);
 	
-		final String namespece= getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_NAMESPACE);
-		final String hubname = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_HUB);
-		final String keyname = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SAAS_KEY_NAME);
-		final String keyval = getMandatoryProperty(AzureConfigurationProperties.CONF_PREFIX,AzureConfigurationProperties.CONF_SAAS_KEY_KEY_VALUE);
+		final String namespece= getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_NAMESPACE);
+		final String hubname = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_HUB);
+		final String keyname = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SAAS_KEY_NAME);
+		final String keyval = getMandatoryProperty(ConfConstants.CONF_PREFIX,ConfConstants.CONF_SAAS_KEY_KEY_VALUE);
 		
 		final ConnectionStringBuilder connStr = new ConnectionStringBuilder()
                 .setNamespaceName(namespece) 

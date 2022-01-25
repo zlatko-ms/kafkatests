@@ -2,6 +2,7 @@ package org.zlatko.testing.spring.azsptest.services.api;
 
 import java.util.Properties;
 
+import org.zlatko.testing.spring.azsptest.util.Configuration;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
 /** defines the test service abstractions */
@@ -27,6 +28,14 @@ public final class Service {
 	
 	/** available service types */
 	public enum ServiceType {
-		PRODUCER, CONSUMER, METADATA_KAFKA, METADATA_AZURE, PRODUCER_AZURE
+		PRODUCER, CONSUMER, METADATA
 	}
+	
+	
+	/** exposed by each provider */
+	public interface ServiceProvider {
+		ConfigurableService getService(Service.ServiceType type,Configuration.ServiceConfiguration conf);
+	}
+	
+	public enum Provider { KAFKA, AZURE };
 }
