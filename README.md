@@ -51,6 +51,15 @@ Params :
  confFilePath : path to a valid configuration file
 ```
 
+To run tests from a Kafka Client to a Kafka cluster use the **kafka** provider for **producer**, **consumer** and **metadata** services.
+
+To run tests from a Kafka Client to an EventHub solution use the **kafka** provider, for both **producer** and **consumer** services and make sure you have populated the azure.* properties (or env vars). The **metadata** service cannot be used with the **kafka** provider on Azure Event Hubs given that this api is not supported on Azure.
+
+To run tests from an EventHub client to an EventHub solution use the **azure** provider for **producer**, **consumer** and **metadata** services.
+
+Obvioulsy there is no way (nor sense) in using an azure provider to address a Kafka cluster as they differ in terms of client APIs.
+
+
 # Configuration 
 
 The application can be configured via properties file and/or environment variables.
