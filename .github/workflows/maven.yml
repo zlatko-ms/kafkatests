@@ -31,7 +31,6 @@ jobs:
     - name: Prepare Docker build tree
       run: |
         cp src/main/docker/* target/.
-        cp src/run/conf/configuration.properties.azure target/.
         cp src/run/conf/configuration.properties target/.
 
   
