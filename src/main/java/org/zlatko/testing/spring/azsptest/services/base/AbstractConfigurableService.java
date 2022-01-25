@@ -5,28 +5,20 @@ import java.util.Properties;
 import org.zlatko.testing.spring.azsptest.services.api.Service;
 import org.zlatko.testing.spring.azsptest.util.Configuration.ServiceConfiguration;
 
+import com.google.common.base.Strings;
+
 /**
  * base kafka test service class, provides common configuration processing
  * facilities
  */
 public abstract class AbstractConfigurableService implements Service.ConfigurableService {
 
-	private final static String KAFKA_SHARED_SERVICE = "kafka";
-
-	private Properties kafkaProperties;
-	private Properties serviceProperties;
+	private ServiceConfiguration globalConfiguration;
 	private Service.ServiceType serviceType;
 
 	protected AbstractConfigurableService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		this.serviceType = serviceType;
-		kafkaProperties = new Properties();
-		kafkaProperties.putAll(appConfig.getServiceConfiguration(KAFKA_SHARED_SERVICE));
-		serviceProperties = new Properties();
-		serviceProperties.putAll(appConfig.getServiceConfiguration(getName()));
-	}
-
-	protected void addSpecificKafkaProp(String key, String value) {
-		kafkaProperties.put(key, value);
+		globalConfiguration=appConfig;
 	}
 
 	@Override
@@ -40,12 +32,30 @@ public abstract class AbstractConfigurableService implements Service.Configurabl
 	}
 
 	@Override
-	public Properties getKafkaProperties() {
-		return kafkaProperties;
-	}
-
-	@Override
 	public Properties getServiceProperties() {
-		return serviceProperties;
+		return globalConfiguration.getConfiguration(getName());
 	}
+	
+	@Override
+	public ServiceConfiguration getGlobalConfiguration() {
+		return globalConfiguration;
+	}
+	
+	
+	@Override
+	public String getMandatoryServiceProperty(String propName) {
+		return getMandatoryProperty(getServiceType().name().toLowerCase(), propName);
+	}
+	
+	@Override
+	public String getMandatoryProperty(String prefix,String propName) {
+		String val =getGlobalConfiguration().getConfiguration().getProperty(prefix+"."+propName,null);
+		if (Strings.isNullOrEmpty(val)) {
+			String msg = String.format("Missing mandatory configuration parmeter %s.%s",
+					prefix, propName);
+			throw new RuntimeException(msg);
+		}
+		return val;
+	}
+	
 }

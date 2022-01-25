@@ -2,6 +2,7 @@ package org.zlatko.testing.spring.azsptest.services.provider.kafka;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -27,12 +28,14 @@ public class SimpleKafkaConsumer extends AbstractConsumerService {
 	public SimpleKafkaConsumer(ServiceConfiguration configuration) {
 
 		super(Service.ServiceType.CONSUMER, configuration);
+		Properties kafkaProperties = configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
 		if (getConsumerGroup().isPresent())
-			addSpecificKafkaProp(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroup().get());
-		addSpecificKafkaProp(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-		addSpecificKafkaProp(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+			kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, getConsumerGroup().get());
+		kafkaProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+		kafkaProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
-		kafkaConsumer = new KafkaConsumer<String, String>(getKafkaProperties());
+		configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		kafkaConsumer = new KafkaConsumer<String, String>(kafkaProperties);
 	}
 
 	@Override

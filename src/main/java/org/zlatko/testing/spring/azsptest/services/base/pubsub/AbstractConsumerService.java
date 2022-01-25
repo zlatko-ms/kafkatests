@@ -50,7 +50,7 @@ public abstract class AbstractConsumerService extends AbstractConfigurableServic
 	
 	protected AbstractConsumerService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
-		Properties consumerConfig= appConfig.getServiceConfiguration(Service.ServiceType.CONSUMER.name().toLowerCase());
+		Properties consumerConfig= appConfig.getConfiguration(Service.ServiceType.CONSUMER.name().toLowerCase());
 		topicName = consumerConfig.getProperty(ConfigurationProperties.CONF_TOPIC_NAME, "");
 		pollTimeMs = Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_POLL_DURATION_MS, "1000"));
 		idleAfterPollMs = Optional.of(Long.parseLong(getServiceProperties().getProperty(ConfigurationProperties.CONF_WAIT_AFTER_POLL_MS, "1000")));
@@ -88,16 +88,6 @@ public abstract class AbstractConsumerService extends AbstractConfigurableServic
 					log.info(String.format("<event_dump> message key=%s value=%s", m.getKey(),m.getValueAsJson()));
 				});
 			}
-			
-			double durationSeconds = pollTime / 1000;
-			double throughputKbs = (bytesRecv/1024)/durationSeconds;
-			double throughputEps = messages.size()/durationSeconds;
-			
-			
-			log.info(String.format("instant stats messages=%d throughput=%s kb/s speed=%s evts/s",
-					messages.size(),
-					perfTracker.formatDecimal(throughputKbs),
-					perfTracker.formatDecimal(throughputEps)));
 			
 			log.info(String.format("aggregated stats messages=%d throughput=%s kb/s speed=%s evts/s",
 					perfTracker.getTotalMessagesCount(),

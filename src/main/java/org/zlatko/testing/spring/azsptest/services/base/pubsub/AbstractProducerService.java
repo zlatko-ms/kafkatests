@@ -23,10 +23,10 @@ import lombok.extern.java.Log;
 public abstract class AbstractProducerService extends AbstractConfigurableService implements PubSub.ProducerService {
 
 	private final class ConfigurationProperties {
-		static final String CONF_BATCH_SIZE = "messages.per.batch";
+		static final String CONF_BATCH_SIZE = "events.per.batch";
 		static final String CONF_WAIT_AFTER_BATCH = "wait.after.batch.ms";
-		static final String CONF_MAX_MESSAGES = "messages.max";
-		static final String CONF_MESSAGE_SIZE= "messages.size";
+		static final String CONF_MAX_MESSAGES = "events.max";
+		static final String CONF_MESSAGE_SIZE= "events.size";
 		static final String CONF_TOPIC_NAME = "topic.name";
 		static final String CONF_TOPIC_CREATE_PARTITIONS = "topic.create.partitions";
 		static final String CONF_TOPIC_CREATE_REPLICAS = "topics.create.replication";
@@ -59,7 +59,7 @@ public abstract class AbstractProducerService extends AbstractConfigurableServic
 	protected AbstractProducerService(Service.ServiceType serviceType, ServiceConfiguration appConfig) {
 		super(serviceType, appConfig);
 		
-		Properties producerProps = appConfig.getServiceConfiguration(ServiceType.PRODUCER.name().toLowerCase());
+		Properties producerProps = appConfig.getConfiguration(ServiceType.PRODUCER.name().toLowerCase());
 		messageBatchSize = Integer.parseInt(producerProps.getProperty(ConfigurationProperties.CONF_BATCH_SIZE, "1"));
 		postBatchWaitTimeMs = Long.parseLong(producerProps.getProperty(ConfigurationProperties.CONF_WAIT_AFTER_BATCH, "5000"));
 		topicName = producerProps.getProperty(ConfigurationProperties.CONF_TOPIC_NAME, "zkafkatesttopic");
@@ -107,19 +107,13 @@ public abstract class AbstractProducerService extends AbstractConfigurableServic
 			long startTime = System.currentTimeMillis();
 			sendEvents(messages);
 			long duration = System.currentTimeMillis() - startTime;
-			if (duration < 1)
+			if (duration == 0)
 				duration = 1;
-
+				
 			log.info(String.format("batch sent in %d ms total size=%s bytes", duration, batchSizeInBytes));
-			double currentStepThroughputEpS = getMessageBatchSize() / (duration / 1000);
-			double currentStepThroughputKbs = (batchSizeInBytes / 1024) / (duration / 1000);
 			perfTracker.increaseProcessingPayloadSizeBytes(batchSizeInBytes);
 			perfTracker.increaseMessageCount(messages.size());
 			perfTracker.increaseProcessingTimeMillisecs(duration);
-
-			log.info(String.format("last stats throughput=%s kb/s speed=%s evts/s",
-					perfTracker.formatDecimal(currentStepThroughputKbs),
-					perfTracker.formatDecimal(currentStepThroughputEpS)));
 
 			log.info(String.format("aggregated stats throughput=%s kb/s speed=%s evts/s total_sent=%s limit=%s",
 					perfTracker.getReadbleThroughputKBs(), perfTracker.getReadableThroughputEps(),
@@ -143,6 +137,7 @@ public abstract class AbstractProducerService extends AbstractConfigurableServic
 				keepProcessing = perfTracker.getTotalMessagesCount() < getMaxMessagesToProduce().get();
 				if (!keepProcessing) {
 					log.info("all messages sent, finishing processing");
+					shutdown();
 				}
 			}
 		}

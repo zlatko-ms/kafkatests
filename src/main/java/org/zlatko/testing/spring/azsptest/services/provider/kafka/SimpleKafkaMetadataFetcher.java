@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ConsumerGroupListing;
@@ -54,7 +55,8 @@ public class SimpleKafkaMetadataFetcher extends AbstractMetadataFetcherService i
 		super(Service.ServiceType.METADATA_KAFKA,appConfig);
 		describeTopicsPrivate = Boolean.parseBoolean(getServiceProperties().getProperty(ConfigurationProperties.CONF_DESCRIBE_INTERNAL_TOPICS, "false"));
 		describeTopicList.addAll(getTopicsToDescribe());
-		adminClient = AdminClient.create(getKafkaProperties());
+		Properties kafkaProperties = appConfig.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		adminClient = AdminClient.create(kafkaProperties);
 	}
 	
 	@Override

@@ -21,21 +21,23 @@ public class Configuration {
 
 	/** contains all properties for the distinct test services */
 	public interface ServiceConfiguration {
-
+		// load from properties
 		void loadFrom(Properties p);
-
+		// load from file
 		void loadFrom(String filePath);
-
-		Properties getServiceConfiguration(String serviceName);
-
+		// return the configuration of a given service/prefix
+		Properties getConfiguration(String serviceName);
+		// return the overall configuration
+		Properties getConfiguration();
+		// return the file path , if conf loaded via file
 		String getLoadedConfigurationFilePath();
 	}
 
 	/** abstracts the command line parameters */
 	public interface CommandLineParameters {
-
+		// parse the cmd line 
 		void parse(String[] cmdLineParams);
-
+		// return the parameter by name 
 		Optional<String> getParam(String name);
 
 	}
@@ -147,7 +149,7 @@ public class Configuration {
 		}
 
 		@Override
-		public Properties getServiceConfiguration(String serviceName) {
+		public Properties getConfiguration(String serviceName) {
 			Properties ret = new Properties();
 			String tagService = serviceName.toLowerCase();
 			loadedProperties.keySet().forEach(key -> {
@@ -165,6 +167,10 @@ public class Configuration {
 			return loadedConfFilePath;
 		}
 
+		@Override
+		public Properties getConfiguration() {
+			return loadedProperties;
+		}
 	}
 
 }

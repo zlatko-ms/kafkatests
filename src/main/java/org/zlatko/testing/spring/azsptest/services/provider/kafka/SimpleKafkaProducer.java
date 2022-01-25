@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -73,16 +74,21 @@ public class SimpleKafkaProducer extends AbstractProducerService  {
 	public SimpleKafkaProducer(ServiceConfiguration configuration) {
 
 		super(Service.ServiceType.PRODUCER, configuration);
-
-		partitionerClassName = getPartitionnerClassName(getServiceProperties().getProperty(ConfigurationProperties.CONF_PRODUCER_REPLICATION, "UNIQUE"));
-		adminClient = AdminClient.create(getKafkaProperties());
-		addSpecificKafkaProp(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		addSpecificKafkaProp(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		
+		final String partitionnerType = getServiceProperties().getProperty(ConfigurationProperties.CONF_PRODUCER_REPLICATION, "UNIQUE");
+		partitionerClassName = getPartitionnerClassName(partitionnerType);
+		
+		Properties kafkaProperties = configuration.getConfiguration(ConfigurationConstants.KAFKA_SHARED_SERVICE);
+		
+		adminClient = AdminClient.create(kafkaProperties);
+		
+		kafkaProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		kafkaProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		if (partitionerClassName != null) {
-			addSpecificKafkaProp(ProducerConfig.PARTITIONER_CLASS_CONFIG, partitionerClassName);
+			kafkaProperties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, partitionerClassName);
 			log.info("Using partitioner class " + partitionerClassName);
 		}	
-		producer = new KafkaProducer<String, String>(getKafkaProperties());
+		producer = new KafkaProducer<String, String>(kafkaProperties);
 	}
 
 	@SneakyThrows
@@ -126,6 +132,12 @@ public class SimpleKafkaProducer extends AbstractProducerService  {
 			producer.flush();
 		}
 		return resultingOffset;
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

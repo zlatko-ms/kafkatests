@@ -23,8 +23,8 @@ class ServiceConfigurationTest {
 		ptest.put("service2.runner.threads", "48");
 		appConf.loadFrom(ptest);
 		
-		Properties service1conf = appConf.getServiceConfiguration("service1");
-		Properties service2conf = appConf.getServiceConfiguration("service2");
+		Properties service1conf = appConf.getConfiguration("service1");
+		Properties service2conf = appConf.getConfiguration("service2");
 		assertNotNull(service1conf.get("runner.id"),"service 1 runner.id is provided");
 		assertNotNull(service1conf.get("runner.threads"),"service 1 runner.threads is provided");
 		assertEquals(service1conf.get("runner.id"),"id1");

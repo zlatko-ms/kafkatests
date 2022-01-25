@@ -77,6 +77,8 @@ public final class PubSub {
 		public long sendEvents(List<Event> messages);
 		// returns the configured message payload size
 		public EventSize getEventSize();
+		// clean shutdown (if needed)
+		public void shutdown();
 		
 	}
 	
