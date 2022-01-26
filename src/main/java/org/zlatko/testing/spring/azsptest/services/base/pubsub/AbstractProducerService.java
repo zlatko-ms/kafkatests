@@ -111,17 +111,16 @@ public abstract class AbstractProducerService extends AbstractConfigurableServic
 				duration = 1;
 				
 			log.info(String.format("batch sent in %d ms total size=%s bytes", duration, batchSizeInBytes));
+			
 			perfTracker.increaseProcessingPayloadSizeBytes(batchSizeInBytes);
 			perfTracker.increaseMessageCount(messages.size());
 			perfTracker.increaseProcessingTimeMillisecs(duration);
+			perfTracker.flushStats();
 
 			log.info(String.format("aggregated stats throughput=%s kb/s speed=%s evts/s total_sent=%s limit=%s",
 					perfTracker.getReadbleThroughputKBs(), perfTracker.getReadableThroughputEps(),
 					perfTracker.getTotalMessagesCount(),
 					getMaxMessagesToProduce().isPresent() ? getMaxMessagesToProduce().get() : "unlimited"));
-
-			log.info(String.format(";CSVSTATS;%s;%s;%s", perfTracker.getReadbleThroughputKBs(),
-					perfTracker.getReadableThroughputEps(), perfTracker.getTotalMessagesCount()));
 
 			long waitTime = getPostBatchWaitTimeMs();
 			if (waitTime > 0) {

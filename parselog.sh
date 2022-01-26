@@ -1,2 +1,5 @@
 #!/bin/bash
-grep CSVSTATS $1  | cut -f 1,2,9- -d' ' | tr -d " [:blank:]" | sed 's/CSVSTATS;//'
+
+echo "DATE;TIME;KB/s;Evt/S;TotalEvents" > stats.csv
+grep -v "∞" kafkatests.stats.log | sed 's/\./\,/g' >> stats.csv
+

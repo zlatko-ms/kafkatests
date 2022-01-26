@@ -82,6 +82,7 @@ public abstract class AbstractConsumerService extends AbstractConfigurableServic
 			perfTracker.increaseMessageCount(messages.size());
 			perfTracker.increaseProcessingTimeMillisecs(pollTime);
 			perfTracker.increaseProcessingPayloadSizeBytes(bytesRecv);
+			perfTracker.flushStats();
 			
 			if ( dumpEventsConfigured ) {
 				messages.forEach( m -> {
@@ -93,11 +94,6 @@ public abstract class AbstractConsumerService extends AbstractConfigurableServic
 					perfTracker.getTotalMessagesCount(),
 					perfTracker.getReadbleThroughputKBs(),
 					perfTracker.getReadableThroughputEps()));
-			
-			log.info(String.format(";CSVSTATS;%s;%s;%s",
-					perfTracker.getReadbleThroughputKBs(),
-					perfTracker.getReadableThroughputEps(),
-					perfTracker.getTotalMessagesCount()));
 			
 			if (getIdleAfterPollMs().isPresent()) {
 				log.info(String.format("sleeping %d ms",getIdleAfterPollMs().get()));

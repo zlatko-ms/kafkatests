@@ -34,16 +34,17 @@ public class Application {
 			super(message);
 		}
 	}
-	
-	private Service.ServiceProvider azureFactory=new AzureServiceFactory();
-	private Service.ServiceProvider kafkaFactory=new KafkaServiceFactory();
+
+	private Service.ServiceProvider azureFactory = new AzureServiceFactory();
+	private Service.ServiceProvider kafkaFactory = new KafkaServiceFactory();
 
 	private CommandLineParameters parseParameters(String[] args) {
-		CommandLineParameters params = Configuration.buildParameters(ConfParams.PARAM_SERVICE, ConfParams.PARAM_PROVIDER, ConfParams.PARAM_CONF);
+		CommandLineParameters params = Configuration.buildParameters(ConfParams.PARAM_SERVICE,
+				ConfParams.PARAM_PROVIDER, ConfParams.PARAM_CONF);
 		params.parse(args);
 		return params;
 	}
-	
+
 	private Service.ServiceType getServiceParameter(CommandLineParameters params) throws ConfException {
 		Optional<String> param = params.getParam(ConfParams.PARAM_SERVICE);
 		Service.ServiceType mode = null;
@@ -58,16 +59,16 @@ public class Application {
 		}
 		return mode;
 	}
-	
+
 	@SneakyThrows
 	private Service.Provider getProviderParameter(CommandLineParameters params) throws ConfException {
 		Optional<String> param = params.getParam(ConfParams.PARAM_PROVIDER);
 		Service.Provider provider = null;
 		if (!param.isEmpty()) {
-			try { 
+			try {
 				provider = Service.Provider.valueOf(param.get().toUpperCase());
-			} catch(IllegalArgumentException e) {
-				throw new ConfException(LogMessages.LOG_ERROR_INVALID_PROVIDER(param.get(),getValidProviders()));
+			} catch (IllegalArgumentException e) {
+				throw new ConfException(LogMessages.LOG_ERROR_INVALID_PROVIDER(param.get(), getValidProviders()));
 			}
 		} else {
 			throw new ConfException(LogMessages.LOG_ERROR_MISSING_PARAM(ConfParams.PARAM_PROVIDER));
@@ -75,32 +76,33 @@ public class Application {
 		return provider;
 	}
 
+	@SneakyThrows
 	private ServiceConfiguration getConfiguration(CommandLineParameters params) {
-		
+
 		List<String> envVarPrefixes = Lists.newArrayList();
 
 		Service.ServiceType[] services = Service.ServiceType.values();
-		for (Service.ServiceType service : services ) {
+		for (Service.ServiceType service : services) {
 			envVarPrefixes.add(service.name().toUpperCase());
 		}
-		
+
 		Service.Provider[] providers = Service.Provider.values();
 		for (Service.Provider provider : providers) {
 			envVarPrefixes.add(provider.name().toUpperCase());
 		}
-		
+
 		Optional<String> confFile = params.getParam(ConfParams.PARAM_CONF);
 		ServiceConfiguration appConf = null;
-		if (!confFile.isEmpty()) {
-			File propFile = new File(confFile.get());
-			if (propFile.exists()) {
-				appConf = Configuration.buildConfiguration(envVarPrefixes);
-				appConf.loadFrom(confFile.get());
-			}
+		if (confFile.isEmpty())
+			throw new ConfException(LogMessages.LOG_ERROR_MISSING_PARAM(ConfParams.PARAM_CONF));
+		File propFile = new File(confFile.get());
+		if (propFile.exists()) {
+			appConf = Configuration.buildConfiguration(envVarPrefixes);
+			appConf.loadFrom(confFile.get());
 		}
 		return appConf;
 	}
-	
+
 	private static final String getValidProviders() {
 		Service.Provider[] values = Service.Provider.values();
 		List<String> svalues = Lists.newArrayList();
@@ -109,7 +111,7 @@ public class Application {
 		}
 		return Joiner.on("|").join(svalues);
 	}
-	
+
 	private static final String getValidServices() {
 		Service.ServiceType[] values = Service.ServiceType.values();
 		List<String> svalues = Lists.newArrayList();
@@ -127,22 +129,22 @@ public class Application {
 				Service.ServiceType service = getServiceParameter(params);
 				Service.Provider provider = getProviderParameter(params);
 				ServiceConfiguration conf = getConfiguration(params);
-				
-				log.info(LogMessages.LOG_BEFORE_SERVICE_START(
-						service.name().toLowerCase(),
-						provider.name().toLowerCase(), 
-						conf.getLoadedConfigurationFilePath()));
 
-				ConfigurableService providerService = provider.equals(Provider.KAFKA) ? kafkaFactory.getService(service, conf) : azureFactory.getService(service, conf);
+				log.info(LogMessages.LOG_BEFORE_SERVICE_START(service.name().toLowerCase(),
+						provider.name().toLowerCase(), conf.getLoadedConfigurationFilePath()));
+
+				ConfigurableService providerService = provider.equals(Provider.KAFKA)
+						? kafkaFactory.getService(service, conf)
+						: azureFactory.getService(service, conf);
 				providerService.run();
-				
+
 			} catch (ConfException e) {
 				log.severe("configuration error : " + e.getMessage());
 				log.info(LogMessages.LOG_USAGE(getValidServices(), getValidProviders()));
 			}
 		};
 	}
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}

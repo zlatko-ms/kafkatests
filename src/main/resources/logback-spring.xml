@@ -1,46 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOGS" value="./logs" />
+	<property name="LOGS" value="./logs" />
 
-    <appender name="Console"
-        class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>
-                %yellow(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] : %msg%n%throwable
-            </Pattern>
+	<appender name="Console"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>
+				%yellow(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] : %msg%n%throwable
+			</Pattern>
+			<!-- <Pattern> %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): 
+				%msg%n%throwable </Pattern> -->
+		</layout>
+	</appender>
 
-            <!-- <Pattern>
-                %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
-            </Pattern> -->
-        </layout>
-    </appender>
-    
-      <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>kafkatests.log</file>
-        <encoder>
-            <pattern>%d [%thread] %-5level %t : - %msg%n</pattern>
-        </encoder>
-         
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>kafkatests-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>1MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>10MB</totalSizeCap>
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-    </appender>
+	<appender name="RollingFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>kafkatests.log</file>
+		<encoder>
+			<pattern>%d [%thread] %-5level %t : - %msg%n</pattern>
+		</encoder>
 
-    <!-- LOG everything at WARN level -->
-    <root level="warn">
-        <appender-ref ref="Console" />
-        <appender-ref ref="RollingFile" />
-    </root>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>kafkatests-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<maxFileSize>1MB</maxFileSize>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>10MB</totalSizeCap>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+	</appender>
 
-    <!-- LOG "org.testing*" at INFO level -->
-    <logger name="org.testing" level="info">
-        <appender-ref ref="Console" />
-        <appender-ref ref="RollingFile" />
-    </logger>
+	<appender name="STATSFILE" class="ch.qos.logback.core.FileAppender">
+		<file>kafkatests.stats.log</file>
+		<append>true</append>
+		<!-- set immediateFlush to false for much higher logging throughput -->
+		<immediateFlush>true</immediateFlush>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd;HH:mm:ss};%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- LOG everything at WARN level -->
+	<root level="warn">
+		<appender-ref ref="Console" />
+		<appender-ref ref="RollingFile" />
+	</root>
+
+	<!-- LOG "org.testing*" at INFO level -->
+	<logger name="org.testing" level="info">
+		<appender-ref ref="Console" />
+		<appender-ref ref="RollingFile" />
+	</logger>
+	
+	<!--  LOG "PerfTracker" at INFO level in a separate file -->
+	<logger name="org.zlatko.testing.spring.azsptest.services.base.PubSubPerformanceTracker" level="debug" addivity="false">
+		<appender-ref ref="STATSFILE" />
+	</logger>
 
 </configuration>

@@ -42,7 +42,6 @@ class PubSubPerformanceTrackerTest {
 		for (EventSize z : EventSize.values() ) {
 			assertMessageSize(z);
 		}
-		
 	}
 
 }

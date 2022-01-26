@@ -6,8 +6,10 @@ import java.text.DecimalFormat;
 import org.zlatko.testing.spring.azsptest.services.api.PubSub;
 
 import lombok.Getter;
+import lombok.extern.java.Log;
 
 @Getter
+@Log
 /** utility class to track event performances */
 public class PubSubPerformanceTracker implements PubSub.PerformanceTracker {
 	
@@ -58,8 +60,11 @@ public class PubSubPerformanceTracker implements PubSub.PerformanceTracker {
 		return b.length;
 	}
 	
-	public final String formatDecimal(double d) {
-		return df.format(d);
+	public final void flushStats() {	
+		log.fine(String.format("%s;%s;%s", 
+				getReadbleThroughputKBs(),
+				getReadableThroughputEps(),
+				getTotalMessagesCount()));
 	}
 
 	

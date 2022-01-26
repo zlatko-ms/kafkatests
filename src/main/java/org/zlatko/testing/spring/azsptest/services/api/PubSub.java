@@ -32,8 +32,8 @@ public final class PubSub {
 		public String getReadableProcessingTimeMinutes();
 		// returns the size (bytes) of the string passed as payload
 		public  int getBytesInString(String payload);
-		// format decimals for spreadsheet
-		public String formatDecimal(double d);
+		// flush stats to file
+		public void flushStats();
 	}
 	
 	/** consumer service */
